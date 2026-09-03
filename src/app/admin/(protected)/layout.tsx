@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { hasAdminSession } from "@/lib/admin-session";
 import { logOut } from "../actions";
@@ -18,7 +19,14 @@ export default async function ProtectedAdminLayout({
   return (
     <div className="mx-auto w-full max-w-3xl p-4 pb-24">
       <header className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">Units</h1>
+        <nav className="flex items-center gap-4 text-sm font-medium">
+          <Link href="/admin" className="min-h-11 leading-[2.75rem]">
+            Units
+          </Link>
+          <Link href="/admin/qr" className="min-h-11 leading-[2.75rem]">
+            Print QR
+          </Link>
+        </nav>
         <form action={logOut}>
           <button
             type="submit"

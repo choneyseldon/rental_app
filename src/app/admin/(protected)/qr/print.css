@@ -1,0 +1,92 @@
+/* A4, two columns of five cards. Each card is a door sticker. */
+.qr-sheet {
+  --card-w: 95mm;
+  --card-h: 54mm;
+  display: grid;
+  grid-template-columns: repeat(2, var(--card-w));
+  gap: 3mm;
+  justify-content: center;
+}
+
+.qr-card {
+  width: var(--card-w);
+  height: var(--card-h);
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4mm;
+  align-items: center;
+  padding: 4mm;
+  border: 0.3mm solid #000;
+  border-radius: 2mm;
+  background: #fff;
+  color: #000;
+  /* Never split a card across a page. */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.qr-card svg {
+  display: block;
+  width: 40mm;
+  height: 40mm;
+  /* Keep modules hard-edged; smoothing eats scan reliability at small sizes. */
+  image-rendering: pixelated;
+  shape-rendering: crispEdges;
+}
+
+.qr-dz {
+  font-size: 16pt;
+  line-height: 1.55;
+  font-weight: 700;
+}
+.qr-en {
+  font-size: 9pt;
+  line-height: 1.25;
+}
+.qr-unit {
+  font-size: 15pt;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Loud, deliberately hard to ignore: these codes are not safe to mount. */
+.qr-proof {
+  outline: 1mm solid #b91c1c;
+  outline-offset: -1mm;
+}
+.qr-proof-stamp {
+  position: absolute;
+  /* Clears the 40mm code plus its 4mm padding and 4mm gutter. */
+  inset-inline-start: 48mm;
+  inset-inline-end: 2mm;
+  inset-block-end: 1.5mm;
+  text-align: center;
+  font-size: 7pt;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: #b91c1c;
+  border-radius: 1mm;
+  padding: 0.8mm 1mm;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@page {
+  size: A4;
+  margin: 8mm;
+}
+
+@media print {
+  .qr-no-print {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  .qr-sheet {
+    gap: 2mm;
+  }
+}
