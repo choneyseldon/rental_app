@@ -39,6 +39,9 @@ export default async function ProtectedAdminLayout({
       <header className="mb-6 flex items-center justify-between gap-4">
         <nav className="flex items-center gap-4 text-sm font-medium">
           <Link href="/admin" className="min-h-11 leading-[2.75rem]">
+            Overview
+          </Link>
+          <Link href="/admin/units" className="min-h-11 leading-[2.75rem]">
             Units
           </Link>
           <Link

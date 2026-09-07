@@ -1,7 +1,8 @@
 import { v } from "convex/values";
 import { nanoid } from "nanoid";
 import { mutation, query, type QueryCtx, type MutationCtx } from "./_generated/server";
-import { currentMonthKey } from "./tenant";
+import type { Id } from "./_generated/dataModel";
+import { currentMonthKey, deriveStatus } from "./tenant";
 
 /**
  * Convex functions are public HTTP endpoints, and the units table holds the
@@ -338,5 +339,117 @@ export const publishWaterBill = mutation({
 
     await ctx.db.patch(period._id, { isPublished: true });
     return { units: occupied.length, total: period.waterTotal };
+  },
+});
+
+/**
+ * Everything needed to answer "who has not paid?" without a second look.
+ *
+ * Arrears carry a known limitation. Water arrears are exact, because
+ * waterShares stores the amount that was charged. Rent arrears are computed
+ * from the unit's *current* rent, since the schema keeps no rent history, so a
+ * unit whose rent changed will show past months valued at today's figure. The
+ * page labels the number as an estimate for that reason.
+ */
+export const dashboard = query({
+  args: secretArg,
+  handler: async (ctx, { secret }) => {
+    assertAdmin(ctx, secret);
+
+    const month = currentMonthKey();
+    const units = (await ctx.db.query("units").collect())
+      .filter((u) => u.isOccupied)
+      .sort((a, b) => Number(a.unitNumber) - Number(b.unitNumber));
+
+    const periods = await ctx.db.query("periods").collect();
+    const thisPeriod = periods.find((p) => p.month === month) ?? null;
+    const pastPeriods = periods.filter((p) => p.month < month);
+
+    const rows = await Promise.all(
+      units.map(async (unit) => {
+        const all = await ctx.db
+          .query("submissions")
+          .withIndex("by_unit_and_period", (q) => q.eq("unitId", unit._id))
+          .collect();
+
+        const forPeriod = (periodId: Id<"periods">, type: "rent" | "water") =>
+          all.filter((s) => s.periodId === periodId && s.type === type);
+
+        const rentStatus = thisPeriod
+          ? deriveStatus(forPeriod(thisPeriod._id, "rent"))
+          : ("none" as const);
+
+        let waterAmount: number | null = null;
+        let waterStatus: ReturnType<typeof deriveStatus> = "none";
+        if (thisPeriod?.isPublished) {
+          const share = await ctx.db
+            .query("waterShares")
+            .withIndex("by_unit_and_period", (q) =>
+              q.eq("unitId", unit._id).eq("periodId", thisPeriod._id),
+            )
+            .unique();
+          waterAmount = share?.amount ?? null;
+          waterStatus = deriveStatus(forPeriod(thisPeriod._id, "water"));
+        }
+
+        let arrears = 0;
+        for (const past of pastPeriods) {
+          if (!forPeriod(past._id, "rent").some((s) => s.status === "approved")) {
+            arrears += unit.rentAmount;
+          }
+          if (past.isPublished) {
+            const share = await ctx.db
+              .query("waterShares")
+              .withIndex("by_unit_and_period", (q) =>
+                q.eq("unitId", unit._id).eq("periodId", past._id),
+              )
+              .unique();
+            if (
+              share &&
+              !forPeriod(past._id, "water").some((s) => s.status === "approved")
+            ) {
+              arrears += share.amount;
+            }
+          }
+        }
+
+        return {
+          unitNumber: unit.unitNumber,
+          tenantName: unit.tenantName,
+          tenantPhone: unit.tenantPhone,
+          rentAmount: unit.rentAmount,
+          rentStatus,
+          waterAmount,
+          waterStatus,
+          arrears: Math.round(arrears * 100) / 100,
+        };
+      }),
+    );
+
+    const count = (
+      pick: (r: (typeof rows)[number]) => string,
+      value: string,
+    ) => rows.filter((r) => pick(r) === value).length;
+
+    return {
+      month,
+      waterPublished: thisPeriod?.isPublished === true,
+      occupiedCount: rows.length,
+      rent: {
+        paid: count((r) => r.rentStatus, "approved"),
+        pending: count((r) => r.rentStatus, "pending"),
+        missing: rows.filter(
+          (r) => r.rentStatus !== "approved" && r.rentStatus !== "pending",
+        ).length,
+      },
+      water: {
+        paid: count((r) => r.waterStatus, "approved"),
+        pending: count((r) => r.waterStatus, "pending"),
+        missing: rows.filter(
+          (r) => r.waterStatus !== "approved" && r.waterStatus !== "pending",
+        ).length,
+      },
+      rows,
+    };
   },
 });

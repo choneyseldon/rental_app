@@ -15,10 +15,10 @@ export function currentMonthKey(now = Date.now()): string {
   return `${local.getUTCFullYear()}-${month}`;
 }
 
-type Status = "approved" | "pending" | "rejected" | "none";
+export type Status = "approved" | "pending" | "rejected" | "none";
 
 /** An approved submission wins; otherwise pending, then rejected. */
-function deriveStatus(submissions: Doc<"submissions">[]): Status {
+export function deriveStatus(submissions: Doc<"submissions">[]): Status {
   if (submissions.some((s) => s.status === "approved")) return "approved";
   if (submissions.some((s) => s.status === "pending")) return "pending";
   if (submissions.some((s) => s.status === "rejected")) return "rejected";

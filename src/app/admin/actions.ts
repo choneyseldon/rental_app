@@ -65,6 +65,7 @@ export async function saveUnit(
   }
 
   revalidatePath("/admin");
+  revalidatePath("/admin/units");
   return null;
 }
 
@@ -88,6 +89,7 @@ export async function rotateToken(
   }
 
   revalidatePath("/admin");
+  revalidatePath("/admin/units");
   return null;
 }
 
@@ -130,6 +132,7 @@ export async function reviewSubmission(
 
   revalidatePath("/admin/review");
   revalidatePath("/admin");
+  revalidatePath("/admin/units");
   return null;
 }
 
@@ -206,5 +209,6 @@ export async function publishWaterBill(
 
   revalidatePath("/admin/water");
   revalidatePath("/admin");
+  revalidatePath("/admin/units");
   return null;
 }
