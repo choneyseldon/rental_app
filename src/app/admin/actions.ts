@@ -90,3 +90,45 @@ export async function rotateToken(
   revalidatePath("/admin");
   return null;
 }
+
+export async function reviewSubmission(
+  _prev: { error: string } | null,
+  formData: FormData,
+): Promise<{ error: string } | null> {
+  await requireAdmin();
+
+  const submissionId = formData.get("submissionId");
+  const decision = formData.get("decision");
+  if (
+    typeof submissionId !== "string" ||
+    (decision !== "approved" && decision !== "rejected")
+  ) {
+    return { error: "Missing submission." };
+  }
+
+  const note = String(formData.get("adminNote") ?? "").trim();
+  if (decision === "rejected" && !note) {
+    return { error: "Say why it was rejected, so the tenant can fix it." };
+  }
+
+  const { client, secret } = adminClient();
+  try {
+    await client.mutation(api.admin.reviewSubmission, {
+      secret,
+      submissionId: submissionId as Id<"submissions">,
+      decision,
+      ...(note ? { adminNote: note } : {}),
+    });
+  } catch (e) {
+    // The mutation's own messages are written to be read ("Already approved…"),
+    // so surface them rather than a generic failure.
+    const message = e instanceof Error ? e.message : "";
+    return {
+      error: message.replace(/^\[.*?\]\s*/, "").trim() || "Could not save that decision.",
+    };
+  }
+
+  revalidatePath("/admin/review");
+  revalidatePath("/admin");
+  return null;
+}

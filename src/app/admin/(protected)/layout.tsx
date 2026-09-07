@@ -1,7 +1,23 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { api } from "../../../../convex/_generated/api";
 import { hasAdminSession } from "@/lib/admin-session";
+import { adminClient } from "@/lib/convex-admin";
 import { logOut } from "../actions";
+
+/**
+ * Deliberately swallows failure. The badge is a convenience, and this layout
+ * wraps every admin page — letting a Convex outage throw here would take the
+ * whole admin area down instead of just the count.
+ */
+async function pendingCount(): Promise<number | null> {
+  try {
+    const { client, secret } = adminClient();
+    return await client.query(api.admin.pendingCount, { secret });
+  } catch {
+    return null;
+  }
+}
 
 /**
  * The authoritative guard. proxy.ts only checks that a cookie exists, which is
@@ -16,12 +32,28 @@ export default async function ProtectedAdminLayout({
 }) {
   if (!(await hasAdminSession())) redirect("/admin/login");
 
+  const waiting = await pendingCount();
+
   return (
     <div className="mx-auto w-full max-w-3xl p-4 pb-24">
       <header className="mb-6 flex items-center justify-between gap-4">
         <nav className="flex items-center gap-4 text-sm font-medium">
           <Link href="/admin" className="min-h-11 leading-[2.75rem]">
             Units
+          </Link>
+          <Link
+            href="/admin/review"
+            className="flex min-h-11 items-center gap-1.5 leading-[2.75rem]"
+          >
+            Review
+            {waiting ? (
+              <span
+                aria-label={`${waiting} waiting`}
+                className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white"
+              >
+                {waiting}
+              </span>
+            ) : null}
           </Link>
           <Link href="/admin/qr" className="min-h-11 leading-[2.75rem]">
             Print QR

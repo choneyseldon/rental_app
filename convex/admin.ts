@@ -69,3 +69,91 @@ export const rotateToken = mutation({
     return { token };
   },
 });
+
+/** Count for the nav badge. Cheap enough to run on every admin page. */
+export const pendingCount = query({
+  args: secretArg,
+  handler: async (ctx, { secret }) => {
+    assertAdmin(ctx, secret);
+    const pending = await ctx.db
+      .query("submissions")
+      .withIndex("by_status", (q) => q.eq("status", "pending"))
+      .collect();
+    return pending.length;
+  },
+});
+
+/**
+ * The review queue: every pending screenshot with the context needed to judge
+ * it, so the admin page needs no follow-up lookups. Oldest first, because a
+ * tenant who submitted first has been waiting longest.
+ */
+export const listPending = query({
+  args: secretArg,
+  handler: async (ctx, { secret }) => {
+    assertAdmin(ctx, secret);
+
+    const pending = await ctx.db
+      .query("submissions")
+      .withIndex("by_status", (q) => q.eq("status", "pending"))
+      .collect();
+
+    const rows = await Promise.all(
+      pending.map(async (s) => {
+        const unit = await ctx.db.get(s.unitId);
+        const period = await ctx.db.get(s.periodId);
+        return {
+          submissionId: s._id,
+          unitNumber: unit?.unitNumber ?? "?",
+          tenantName: unit?.tenantName ?? "",
+          month: period?.month ?? "",
+          type: s.type,
+          claimedAmount: s.claimedAmount,
+          expectedAmount:
+            s.type === "rent" ? (unit?.rentAmount ?? null) : null,
+          imageUrl: await ctx.storage.getUrl(s.image),
+          submittedAt: s._creationTime,
+        };
+      }),
+    );
+
+    return rows.sort((a, b) => a.submittedAt - b.submittedAt);
+  },
+});
+
+/**
+ * Approves or rejects one screenshot.
+ *
+ * Refuses a submission that has already been decided, so two taps on a slow
+ * connection cannot silently overwrite the first decision. A rejection must
+ * carry a note: the tenant sees the outcome and needs to know what to fix.
+ */
+export const reviewSubmission = mutation({
+  args: {
+    ...secretArg,
+    submissionId: v.id("submissions"),
+    decision: v.union(v.literal("approved"), v.literal("rejected")),
+    adminNote: v.optional(v.string()),
+  },
+  handler: async (ctx, { secret, submissionId, decision, adminNote }) => {
+    assertAdmin(ctx, secret);
+
+    const submission = await ctx.db.get(submissionId);
+    if (!submission) throw new Error("That submission no longer exists.");
+    if (submission.status !== "pending") {
+      throw new Error(
+        `Already ${submission.status}. Reload the queue to see the current state.`,
+      );
+    }
+
+    const note = adminNote?.trim();
+    if (decision === "rejected" && !note) {
+      throw new Error("Say why it was rejected, so the tenant can fix it.");
+    }
+
+    await ctx.db.patch(submissionId, {
+      status: decision,
+      ...(note ? { adminNote: note } : {}),
+    });
+  },
+});
