@@ -12,10 +12,12 @@ import type { ApiFromModules, FilterApi, FunctionReference } from "convex/server
 import { anyApi } from "convex/server";
 import type * as admin from "../admin.js";
 import type * as seed from "../seed.js";
+import type * as tenant from "../tenant.js";
 
 const fullApi: ApiFromModules<{
   "admin": typeof admin,
 "seed": typeof seed,
+"tenant": typeof tenant,
 }> = anyApi as any;
 
 /**
