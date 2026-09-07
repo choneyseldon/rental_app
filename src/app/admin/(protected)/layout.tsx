@@ -55,6 +55,9 @@ export default async function ProtectedAdminLayout({
               </span>
             ) : null}
           </Link>
+          <Link href="/admin/water" className="min-h-11 leading-[2.75rem]">
+            Water
+          </Link>
           <Link href="/admin/qr" className="min-h-11 leading-[2.75rem]">
             Print QR
           </Link>

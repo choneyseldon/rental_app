@@ -132,3 +132,79 @@ export async function reviewSubmission(
   revalidatePath("/admin");
   return null;
 }
+
+/**
+ * Saves the bill total and, optionally, the photo of the paper bill.
+ *
+ * The bytes travel through here rather than straight from the browser to
+ * Convex: requesting an upload URL needs ADMIN_API_SECRET, and that must not
+ * reach a client bundle. The photo is compressed in the browser first, so the
+ * server action body stays well inside its limit.
+ */
+export async function saveWaterBill(
+  _prev: { error: string } | null,
+  formData: FormData,
+): Promise<{ error: string } | null> {
+  await requireAdmin();
+
+  const total = Number(formData.get("total"));
+  if (!Number.isFinite(total) || total <= 0) {
+    return { error: "Enter the bill total." };
+  }
+
+  const photo = formData.get("photo");
+  const hasPhoto = photo instanceof File && photo.size > 0;
+
+  const { client, secret } = adminClient();
+  try {
+    let image: Id<"_storage"> | undefined;
+
+    if (hasPhoto) {
+      const uploadUrl = await client.mutation(api.admin.generateBillUploadUrl, {
+        secret,
+      });
+      const res = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": photo.type || "application/octet-stream" },
+        body: await photo.arrayBuffer(),
+      });
+      if (!res.ok) return { error: "Could not upload the bill photo." };
+      ({ storageId: image } = (await res.json()) as { storageId: Id<"_storage"> });
+    }
+
+    await client.mutation(api.admin.setWaterBill, { secret, total, image });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "";
+    return {
+      error:
+        message.replace(/^\[.*?\]\s*/, "").trim() || "Could not save the bill.",
+    };
+  }
+
+  revalidatePath("/admin/water");
+  return null;
+}
+
+/** Freezes the split and makes it visible to every tenant. */
+export async function publishWaterBill(
+  _prev: { error: string } | null,
+  _formData: FormData,
+): Promise<{ error: string } | null> {
+  await requireAdmin();
+
+  const { client, secret } = adminClient();
+  try {
+    await client.mutation(api.admin.publishWaterBill, { secret });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "";
+    return {
+      error:
+        message.replace(/^\[.*?\]\s*/, "").trim() ||
+        "Could not publish the bill.",
+    };
+  }
+
+  revalidatePath("/admin/water");
+  revalidatePath("/admin");
+  return null;
+}

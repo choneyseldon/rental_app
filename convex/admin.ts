@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { nanoid } from "nanoid";
 import { mutation, query, type QueryCtx, type MutationCtx } from "./_generated/server";
+import { currentMonthKey } from "./tenant";
 
 /**
  * Convex functions are public HTTP endpoints, and the units table holds the
@@ -155,5 +156,187 @@ export const reviewSubmission = mutation({
       status: decision,
       ...(note ? { adminNote: note } : {}),
     });
+  },
+});
+
+/**
+ * Splits a total into `n` shares that sum back to exactly the total.
+ *
+ * Done in chhertum as integers: dividing Ngultrum as floats leaves shares that
+ * do not add up to the bill, which is the kind of discrepancy an owner
+ * reconciling against the Thromde bill will notice. The remainder is handed
+ * out one chhertum at a time, so shares differ by at most Ch. 1.
+ */
+export function splitEvenly(total: number, n: number): number[] {
+  if (n <= 0) return [];
+  const chhertum = Math.round(total * 100);
+  const base = Math.floor(chhertum / n);
+  const remainder = chhertum - base * n;
+  return Array.from(
+    { length: n },
+    (_, i) => (base + (i < remainder ? 1 : 0)) / 100,
+  );
+}
+
+/** Upload URL for the photo of the paper Thromde bill. */
+export const generateBillUploadUrl = mutation({
+  args: secretArg,
+  handler: async (ctx, { secret }) => {
+    assertAdmin(ctx, secret);
+    return ctx.storage.generateUploadUrl();
+  },
+});
+
+/**
+ * The water bill for one month, plus who the split would fall on.
+ *
+ * Returns the prospective split for unpublished months so the admin sees who
+ * is about to be charged before committing — the last chance to catch a wrong
+ * occupancy flag. For published months it returns the stored shares, which are
+ * the record and are not recomputed on read.
+ */
+export const getWaterBill = query({
+  args: { ...secretArg, month: v.optional(v.string()) },
+  handler: async (ctx, { secret, month: requested }) => {
+    assertAdmin(ctx, secret);
+    const month = requested ?? currentMonthKey();
+
+    const period = await ctx.db
+      .query("periods")
+      .withIndex("by_month", (q) => q.eq("month", month))
+      .unique();
+
+    const units = await ctx.db.query("units").collect();
+    const occupied = units
+      .filter((u) => u.isOccupied)
+      .sort((a, b) => Number(a.unitNumber) - Number(b.unitNumber));
+
+    const published = period?.isPublished === true;
+
+    let shares: { unitNumber: string; tenantName: string; amount: number }[];
+    if (published && period) {
+      const stored = await ctx.db
+        .query("waterShares")
+        .withIndex("by_period", (q) => q.eq("periodId", period._id))
+        .collect();
+      shares = stored.map((s) => {
+        const unit = units.find((u) => u._id === s.unitId);
+        return {
+          unitNumber: unit?.unitNumber ?? "?",
+          tenantName: unit?.tenantName ?? "",
+          amount: s.amount,
+        };
+      });
+      shares.sort((a, b) => Number(a.unitNumber) - Number(b.unitNumber));
+    } else {
+      const amounts = splitEvenly(period?.waterTotal ?? 0, occupied.length);
+      shares = occupied.map((u, i) => ({
+        unitNumber: u.unitNumber,
+        tenantName: u.tenantName,
+        amount: amounts[i],
+      }));
+    }
+
+    return {
+      month,
+      total: period?.waterTotal ?? null,
+      billImageUrl: period?.waterBillImage
+        ? await ctx.storage.getUrl(period.waterBillImage)
+        : null,
+      published,
+      occupiedCount: occupied.length,
+      shares,
+    };
+  },
+});
+
+/** Saves the total and the bill photo. Publishing stays a separate step. */
+export const setWaterBill = mutation({
+  args: {
+    ...secretArg,
+    month: v.optional(v.string()),
+    total: v.number(),
+    image: v.optional(v.id("_storage")),
+  },
+  handler: async (ctx, { secret, month: requested, total, image }) => {
+    assertAdmin(ctx, secret);
+    const month = requested ?? currentMonthKey();
+    if (!Number.isFinite(total) || total <= 0) {
+      throw new Error("Enter the bill total.");
+    }
+
+    const period = await ctx.db
+      .query("periods")
+      .withIndex("by_month", (q) => q.eq("month", month))
+      .unique();
+
+    if (period) {
+      await ctx.db.patch(period._id, {
+        waterTotal: total,
+        ...(image ? { waterBillImage: image } : {}),
+      });
+    } else {
+      await ctx.db.insert("periods", {
+        month,
+        waterTotal: total,
+        ...(image ? { waterBillImage: image } : {}),
+        isPublished: false,
+      });
+    }
+  },
+});
+
+/**
+ * Freezes the split and makes it visible to tenants.
+ *
+ * Shares are written as rows rather than derived on read, so a tenant moving
+ * out later cannot retroactively change what anyone was charged for a month
+ * already published. Re-publishing recomputes deliberately, for the case where
+ * an occupancy flag or the total was wrong; the admin is warned because tenant
+ * pages change under them.
+ */
+export const publishWaterBill = mutation({
+  args: { ...secretArg, month: v.optional(v.string()) },
+  handler: async (ctx, { secret, month: requested }) => {
+    assertAdmin(ctx, secret);
+    const month = requested ?? currentMonthKey();
+
+    const period = await ctx.db
+      .query("periods")
+      .withIndex("by_month", (q) => q.eq("month", month))
+      .unique();
+
+    if (!period || period.waterTotal == null) {
+      throw new Error("Save the bill total first.");
+    }
+
+    const occupied = (await ctx.db.query("units").collect())
+      .filter((u) => u.isOccupied)
+      .sort((a, b) => Number(a.unitNumber) - Number(b.unitNumber));
+
+    if (occupied.length === 0) {
+      throw new Error(
+        "No units are marked occupied, so there is nobody to split between.",
+      );
+    }
+
+    // Clear any previous split for this month before rewriting it.
+    const existing = await ctx.db
+      .query("waterShares")
+      .withIndex("by_period", (q) => q.eq("periodId", period._id))
+      .collect();
+    for (const row of existing) await ctx.db.delete(row._id);
+
+    const amounts = splitEvenly(period.waterTotal, occupied.length);
+    for (let i = 0; i < occupied.length; i++) {
+      await ctx.db.insert("waterShares", {
+        unitId: occupied[i]._id,
+        periodId: period._id,
+        amount: amounts[i],
+      });
+    }
+
+    await ctx.db.patch(period._id, { isPublished: true });
+    return { units: occupied.length, total: period.waterTotal };
   },
 });
