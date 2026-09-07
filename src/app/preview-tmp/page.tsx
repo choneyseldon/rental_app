@@ -25,7 +25,14 @@ const fixture: TenantData = {
   ],
 };
 
+/**
+ * Evaluated per request. Without this the route is prerendered, the env gate
+ * is read at build time, and the 404 is baked into static output where no
+ * runtime value can reach it.
+ */
+export const dynamic = "force-dynamic";
+
 export default function PreviewPage() {
-  if (process.env.NODE_ENV === "production") notFound();
-  return <TenantCards data={fixture} />;
+  if (process.env.ENABLE_PREVIEW !== "1") notFound();
+  return <TenantCards data={fixture} token="preview-token" />;
 }

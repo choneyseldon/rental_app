@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 import { useState } from "react";
 import { api } from "../../../../convex/_generated/api";
+import { PaymentUpload } from "./PaymentUpload";
 
 type Status = "approved" | "pending" | "rejected" | "none";
 
@@ -104,11 +105,18 @@ export function TenantView({ token }: { token: string }) {
     );
   }
 
-  return <TenantCards data={data} />;
+  return <TenantCards data={data} token={token} />;
 }
 
 /** Presentation only: no query, so it can be rendered from fixture data. */
-export function TenantCards({ data }: { data: TenantData }) {
+export function TenantCards({
+  data,
+  token,
+}: {
+  data: TenantData;
+  /** Omitted in layout previews, where uploading is not wired up. */
+  token?: string;
+}) {
   return (
     <main className="mx-auto max-w-md space-y-4 p-4 pb-16">
       <header className="pt-2">
@@ -125,6 +133,13 @@ export function TenantCards({ data }: { data: TenantData }) {
           {money(data.rent.amount)}
         </p>
         <StatusPill status={data.rent.status} />
+        {token && data.rent.status !== "approved" && data.rent.status !== "pending" ? (
+          <PaymentUpload
+            token={token}
+            type="rent"
+            suggestedAmount={data.rent.amount}
+          />
+        ) : null}
       </Card>
 
       <Card title="Water">
@@ -143,6 +158,15 @@ export function TenantCards({ data }: { data: TenantData }) {
               >
                 See the Thromde bill
               </a>
+            ) : null}
+            {token &&
+            data.water.status !== "approved" &&
+            data.water.status !== "pending" ? (
+              <PaymentUpload
+                token={token}
+                type="water"
+                suggestedAmount={data.water.amount}
+              />
             ) : null}
           </>
         ) : (
