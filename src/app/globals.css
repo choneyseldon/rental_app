@@ -1,6 +1,16 @@
 @import "tailwindcss";
 
+/*
+ * Deliberately light-only, not theme-following.
+ *
+ * Tenants read this outdoors, at a door, often in bright daylight, which is
+ * where dark backgrounds lose badly. The printed QR cards assume white paper
+ * as well. `color-scheme: light` also keeps native controls — text inputs and
+ * the file picker — light, so a phone in dark mode cannot render a dark input
+ * inside a white card.
+ */
 :root {
+  color-scheme: light;
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -12,15 +22,12 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--background);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
