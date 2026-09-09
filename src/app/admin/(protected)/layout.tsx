@@ -36,17 +36,17 @@ export default async function ProtectedAdminLayout({
 
   return (
     <div className="mx-auto w-full max-w-3xl p-4 pb-24">
-      <header className="mb-6 flex items-center justify-between gap-4">
-        <nav className="flex items-center gap-4 text-sm font-medium">
-          <Link href="/admin" className="min-h-11 leading-[2.75rem]">
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-medium">
+          <Link href="/admin" className="min-h-11 whitespace-nowrap leading-[2.75rem]">
             Overview
           </Link>
-          <Link href="/admin/units" className="min-h-11 leading-[2.75rem]">
+          <Link href="/admin/units" className="min-h-11 whitespace-nowrap leading-[2.75rem]">
             Units
           </Link>
           <Link
             href="/admin/review"
-            className="flex min-h-11 items-center gap-1.5 leading-[2.75rem]"
+            className="flex min-h-11 items-center gap-1.5 whitespace-nowrap leading-[2.75rem]"
           >
             Review
             {waiting ? (
@@ -58,17 +58,17 @@ export default async function ProtectedAdminLayout({
               </span>
             ) : null}
           </Link>
-          <Link href="/admin/water" className="min-h-11 leading-[2.75rem]">
+          <Link href="/admin/water" className="min-h-11 whitespace-nowrap leading-[2.75rem]">
             Water
           </Link>
-          <Link href="/admin/qr" className="min-h-11 leading-[2.75rem]">
+          <Link href="/admin/qr" className="min-h-11 whitespace-nowrap leading-[2.75rem]">
             Print QR
           </Link>
         </nav>
         <form action={logOut}>
           <button
             type="submit"
-            className="min-h-11 rounded-lg border border-neutral-400 px-4 text-sm font-medium"
+            className="min-h-11 whitespace-nowrap rounded-lg border border-neutral-400 px-4 text-sm font-medium"
           >
             Log out
           </button>
