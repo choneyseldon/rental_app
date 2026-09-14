@@ -70,6 +70,7 @@ export default async function QrSheetPage() {
     units.map(async (unit) => ({
       id: unit._id,
       unitNumber: unit.unitNumber,
+      path: `/u/${unit.token}`,
       svg: await QRCode.toString(`${baseUrl}/u/${unit.token}`, {
         type: "svg",
         errorCorrectionLevel: "H",
@@ -100,7 +101,8 @@ export default async function QrSheetPage() {
 
       <div className="qr-no-print mb-5 text-sm text-muted">
         {cards.length} cards. Print at 100% scale — any &ldquo;fit to page&rdquo;
-        shrink changes the physical size of the codes.
+        shrink changes the physical size of the codes. Use{" "}
+        <b>Open</b> under a card to see that tenant&rsquo;s page yourself.
       </div>
 
       <div className="qr-sheet">
@@ -119,6 +121,14 @@ export default async function QrSheetPage() {
               <p className="qr-en qr-house">{PROPERTY.name}</p>
             </div>
             {blocked ? <span className="qr-proof-stamp">PROOF — DO NOT MOUNT</span> : null}
+            <a
+              href={card.path}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="qr-no-print absolute bottom-1 right-2 text-[11px] font-semibold text-brand underline"
+            >
+              Open
+            </a>
           </div>
         ))}
       </div>
