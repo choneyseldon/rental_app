@@ -42,6 +42,11 @@ export function AppShell({
   const pathname = usePathname();
   const tabs = nav.filter((n) => n.primary !== false).slice(0, 5);
 
+  // The tenant nav scrolls to sections on one page rather than routing, so the
+  // first entry stands in for "you are here".
+  const activeFor = (href: string) =>
+    href.startsWith("#") ? href === nav[0]?.href : isActive(pathname, href);
+
   return (
     <div className="min-h-screen lg:flex">
       {/* Desktop sidebar */}
@@ -51,7 +56,7 @@ export function AppShell({
         </div>
         <nav className="mt-8 flex flex-1 flex-col gap-1">
           {nav.map((item) => {
-            const active = isActive(pathname, item.href);
+            const active = activeFor(item.href);
             return (
               <Link
                 key={item.href}
@@ -114,7 +119,7 @@ export function AppShell({
       {/* Mobile bottom tabs */}
       <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-white lg:hidden">
         {tabs.map((item) => {
-          const active = isActive(pathname, item.href);
+          const active = activeFor(item.href);
           return (
             <Link
               key={item.href}

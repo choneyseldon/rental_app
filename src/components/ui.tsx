@@ -7,13 +7,16 @@ export const money = (n: number, dp = 0) =>
 export function Card({
   children,
   className = "",
+  id,
   as: As = "section",
 }: {
   children: React.ReactNode;
   className?: string;
+  /** Lets the tenant nav scroll to a section. */
+  id?: string;
   as?: "section" | "div" | "li";
 }) {
-  return <As className={`card p-4 sm:p-5 ${className}`}>{children}</As>;
+  return <As id={id} className={`card p-5 sm:p-6 ${className}`}>{children}</As>;
 }
 
 /** Soft square tile behind an icon — the motif the whole design leans on. */
@@ -103,11 +106,11 @@ export function StatCard({
     </>
   );
   return href ? (
-    <Link href={href} className="card block p-4 transition-shadow hover:shadow-md">
+    <Link href={href} className="card block p-5 transition-shadow hover:shadow-md">
       {body}
     </Link>
   ) : (
-    <div className="card p-4">{body}</div>
+    <div className="card p-5">{body}</div>
   );
 }
 
