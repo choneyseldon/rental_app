@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ChimBill
 
-## Getting Started
+Rent and utility management for **Dorji Khangzang**, Jungshina, Thimphu.
 
-First, run the development server:
+A printed QR code is mounted at each of the ten doors. Tenants scan it to see
+what they owe and to send proof of payment. The owner reviews those
+submissions, publishes the monthly water bill, and can see at a glance who has
+not paid.
+
+## How it works
+
+**Tenants** have no account, no password and nothing to install. The QR at
+their door contains a long random token, and that token is the credential. It
+resolves to one unit and shows only that unit's bills.
+
+**The owner** signs in with a passcode and reviews payment screenshots by eye.
+There is no payment gateway — at ten units, a person looking at an image is the
+right amount of machinery.
+
+Three money flows, handled differently:
+
+| | How |
+| --- | --- |
+| **Rent** | paid to the owner's account, screenshot uploaded, owner approves |
+| **Water** | one Thromde bill, split equally across occupied units, then as rent |
+| **Electricity** | display only — the page shows the BPC consumer number to pay BPC directly |
+
+## Running it locally
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npx convex dev        # leave running; it writes NEXT_PUBLIC_CONVEX_URL
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Copy `.env.local.example` and fill in the rest, then in a second terminal:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npx convex env set ADMIN_API_SECRET '<same value as .env.local>'
+npx convex run seed:seedUnits --push
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `/admin` — the owner's side, passcode from `ADMIN_PASSCODE`
+- `/u/<token>` — a tenant's page; use the **Open** link on the Print QR page
 
-## Learn More
+## Going live
 
-To learn more about Next.js, take a look at the following resources:
+See **[DEPLOY.md](./DEPLOY.md)** for the full path to production, including the
+one decision that is expensive to reverse: the domain, which every printed QR
+code contains.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Next.js 16 (App Router) · Convex · Tailwind 4 · deployed on Vercel.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Property details, the unit list and the rent account live in
+`convex/property.ts`, shared by the backend and the UI so they cannot drift.
