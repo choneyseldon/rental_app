@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { AdminShell } from "../../admin/(protected)/AdminShell";
 import { Overview, type DashboardData } from "../../admin/(protected)/Overview";
 
 /** Layout proofing for the overview. See ../page.tsx for why. */
@@ -23,8 +24,10 @@ const data: DashboardData = {
 export default function OverviewPreviewPage() {
   if (process.env.ENABLE_PREVIEW !== "1") notFound();
   return (
-    <div className="mx-auto w-full max-w-3xl p-4">
+    <AdminShell pending={2}>
+      <div>
       <Overview data={data} />
-    </div>
+      </div>
+    </AdminShell>
   );
 }

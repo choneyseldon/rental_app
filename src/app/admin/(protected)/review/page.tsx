@@ -12,7 +12,7 @@ export default async function ReviewPage() {
     rows = await client.query(api.admin.listPending, { secret });
   } catch {
     return (
-      <p role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-800">
+      <p role="alert" className="card border-bad/30 bg-bad-soft p-4 text-sm text-[#991b1b]">
         Could not load the queue. Check that <code>npx convex dev</code> is
         running and <code>ADMIN_API_SECRET</code> matches on both sides.
       </p>
@@ -21,7 +21,7 @@ export default async function ReviewPage() {
 
   if (rows.length === 0) {
     return (
-      <p className="rounded-lg bg-green-50 p-4 text-base text-green-900">
+      <p className="card border-ok/30 bg-ok-soft p-4 text-base text-[#166534]">
         Nothing waiting. Every screenshot has been reviewed.
       </p>
     );

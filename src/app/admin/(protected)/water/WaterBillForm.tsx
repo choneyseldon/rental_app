@@ -55,7 +55,7 @@ export function WaterBillForm({ bill }: { bill: WaterBill }) {
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold">{bill.month}</h2>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted">
           {bill.published
             ? "Published. Tenants can see their share."
             : "Not published yet. Tenants cannot see this."}
@@ -76,7 +76,7 @@ export function WaterBillForm({ bill }: { bill: WaterBill }) {
             step={0.01}
             defaultValue={bill.total ?? ""}
             required
-            className="min-h-12 w-full rounded-lg border border-neutral-400 px-3 text-lg tabular-nums"
+            className="mt-1 min-h-12 w-full rounded-xl border border-line bg-white px-3 text-lg tabular-nums outline-none focus:border-brand"
           />
         </div>
 
@@ -97,9 +97,9 @@ export function WaterBillForm({ bill }: { bill: WaterBill }) {
             className="min-h-12 w-full text-sm"
           />
           {preparing ? (
-            <p className="text-sm text-neutral-600">Getting it ready…</p>
+            <p className="text-sm text-muted">Getting it ready…</p>
           ) : photoName ? (
-            <p className="text-sm text-green-800">Ready: {photoName}</p>
+            <p className="text-sm text-ok">Ready: {photoName}</p>
           ) : bill.billImageUrl ? (
             <a
               href={bill.billImageUrl}
@@ -113,7 +113,7 @@ export function WaterBillForm({ bill }: { bill: WaterBill }) {
         </div>
 
         {saveState?.error ? (
-          <p role="alert" className="text-sm font-medium text-red-700">
+          <p role="alert" className="text-sm font-medium text-bad">
             {saveState.error}
           </p>
         ) : null}
@@ -121,29 +121,29 @@ export function WaterBillForm({ bill }: { bill: WaterBill }) {
         <button
           type="submit"
           disabled={saving || preparing}
-          className="min-h-12 w-full touch-manipulation rounded-lg bg-neutral-900 font-semibold text-white disabled:opacity-60"
+          className="inline-flex min-h-12 w-full touch-manipulation items-center justify-center rounded-xl bg-brand font-semibold text-white transition-colors hover:bg-brand-strong disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save total and photo"}
         </button>
       </form>
 
-      <section className="rounded-xl border border-neutral-300 p-4">
+      <section className="card p-4 sm:p-5">
         <h3 className="font-semibold">
           {bill.published ? "The split" : "How it would split"}
         </h3>
-        <p className="mb-3 text-sm text-neutral-600">
+        <p className="mb-3 text-sm text-muted">
           Split equally across the {bill.occupiedCount} unit
           {bill.occupiedCount === 1 ? "" : "s"} marked occupied.
         </p>
 
         {bill.shares.length === 0 ? (
-          <p className="rounded-lg bg-amber-100 p-3 text-sm text-amber-900">
+          <p className="rounded-xl bg-warn-soft p-3 text-sm text-[#92400e]">
             No units are marked occupied, so there is nobody to split between.
             Fix the occupancy flags on the Units page first.
           </p>
         ) : (
           <>
-            <ul className="divide-y divide-neutral-200">
+            <ul className="divide-y divide-line">
               {bill.shares.map((s) => (
                 <li
                   key={s.unitNumber}
@@ -161,7 +161,7 @@ export function WaterBillForm({ bill }: { bill: WaterBill }) {
                 </li>
               ))}
             </ul>
-            <p className="mt-3 flex justify-between border-t border-neutral-300 pt-3 text-sm">
+            <p className="mt-3 flex justify-between border-t border-line pt-3 text-sm">
               <span className="text-neutral-600">Adds up to</span>
               <span className="font-semibold tabular-nums">
                 {money(sharesTotal)}
@@ -183,14 +183,14 @@ export function WaterBillForm({ bill }: { bill: WaterBill }) {
         }}
       >
         {publishState?.error ? (
-          <p role="alert" className="mb-2 text-sm font-medium text-red-700">
+          <p role="alert" className="mb-2 text-sm font-medium text-bad">
             {publishState.error}
           </p>
         ) : null}
         <button
           type="submit"
           disabled={publishing || bill.total == null || bill.shares.length === 0}
-          className="min-h-14 w-full touch-manipulation rounded-lg bg-green-700 text-lg font-bold text-white disabled:opacity-40"
+          className="inline-flex min-h-14 w-full touch-manipulation items-center justify-center rounded-xl bg-ok text-lg font-bold text-white transition hover:brightness-95 disabled:opacity-40"
         >
           {publishing
             ? "Publishing…"

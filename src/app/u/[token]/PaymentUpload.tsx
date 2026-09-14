@@ -155,9 +155,9 @@ export function PaymentUpload({
 
   if (stage === "done") {
     return (
-      <div className="mt-4 rounded-lg bg-green-50 p-4">
-        <p className="text-lg font-semibold text-green-900">Sent.</p>
-        <p className="text-green-900">
+      <div className="mt-4 rounded-xl bg-ok-soft p-4">
+        <p className="text-lg font-semibold text-[#166534]">Sent.</p>
+        <p className="text-sm text-[#166534]">
           The owner will check it and this page will update on its own.
         </p>
       </div>
@@ -174,18 +174,18 @@ export function PaymentUpload({
           <img
             src={previewUrl}
             alt="The screenshot you chose"
-            className="max-h-64 w-full rounded-lg border-2 border-neutral-300 object-contain"
+            className="max-h-64 w-full rounded-xl border border-line bg-brand-tint object-contain"
           />
           <button
             type="button"
             onClick={reset}
-            className="min-h-12 w-full touch-manipulation rounded-lg border-2 border-neutral-400 text-base font-semibold"
+            className="inline-flex min-h-12 w-full touch-manipulation items-center justify-center rounded-xl border border-line bg-white text-base font-semibold hover:bg-brand-tint"
           >
             Choose a different picture
           </button>
         </div>
       ) : (
-        <label className="flex min-h-14 w-full touch-manipulation items-center justify-center rounded-lg border-2 border-dashed border-neutral-500 px-4 text-center text-base font-semibold">
+        <label className="flex min-h-14 w-full cursor-pointer touch-manipulation items-center justify-center gap-2 rounded-xl border-2 border-dashed border-brand/40 bg-brand-tint px-4 text-center text-base font-semibold text-brand hover:bg-brand-soft">
           {stage === "compressing" ? "Getting it ready…" : "Add payment screenshot"}
           <input
             ref={inputRef}
@@ -202,7 +202,7 @@ export function PaymentUpload({
         <div>
           <label
             htmlFor={`amount-${type}`}
-            className="block text-sm font-semibold text-neutral-700"
+            className="block text-sm font-semibold text-muted"
           >
             How much did you pay?
           </label>
@@ -214,13 +214,13 @@ export function PaymentUpload({
             step={1}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="min-h-12 w-full rounded-lg border-2 border-neutral-400 px-3 text-lg tabular-nums"
+            className="mt-1 min-h-12 w-full rounded-xl border border-line bg-white px-3 text-lg tabular-nums outline-none focus:border-brand"
           />
         </div>
       ) : null}
 
       {error ? (
-        <p role="alert" className="text-base font-medium text-red-700">
+        <p role="alert" className="text-base font-medium text-bad">
           {error}
         </p>
       ) : null}
@@ -229,7 +229,7 @@ export function PaymentUpload({
         <button
           type="submit"
           disabled={busy}
-          className="min-h-14 w-full touch-manipulation rounded-lg bg-neutral-900 text-lg font-bold text-white disabled:opacity-60"
+          className="inline-flex min-h-14 w-full touch-manipulation items-center justify-center rounded-xl bg-brand text-lg font-bold text-white transition-colors hover:bg-brand-strong disabled:opacity-50"
         >
           {stage === "uploading" ? "Sending…" : "Send to owner"}
         </button>

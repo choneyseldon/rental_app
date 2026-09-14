@@ -12,7 +12,7 @@ export default async function AdminOverviewPage() {
     data = await client.query(api.admin.dashboard, { secret });
   } catch {
     return (
-      <p role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-800">
+      <p role="alert" className="card border-bad/30 bg-bad-soft p-4 text-sm text-[#991b1b]">
         Could not load the overview. Check that <code>npx convex dev</code> is
         running and <code>ADMIN_API_SECRET</code> matches on both sides.
       </p>

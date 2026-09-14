@@ -14,15 +14,15 @@ export type UnitRow = {
 };
 
 const field =
-  "min-h-12 w-full rounded-lg border border-neutral-400 px-3 text-base";
-const label = "block text-xs font-medium text-neutral-600";
+  "min-h-12 w-full rounded-xl border border-line bg-white px-3 text-base outline-none focus:border-brand";
+const label = "block text-xs font-semibold text-muted";
 
 function UnitCard({ unit }: { unit: UnitRow }) {
   const [saveState, save, saving] = useActionState(saveUnit, null);
   const [rotateState, rotate, rotating] = useActionState(rotateToken, null);
 
   return (
-    <li className="rounded-xl border border-neutral-300 p-4">
+    <li className="card p-4 sm:p-5">
       <form action={save} className="space-y-3">
         <input type="hidden" name="unitId" value={unit._id} />
 
@@ -95,7 +95,7 @@ function UnitCard({ unit }: { unit: UnitRow }) {
         </div>
 
         {saveState?.error ? (
-          <p role="alert" className="text-sm text-red-700">
+          <p role="alert" className="text-sm font-medium text-bad">
             {saveState.error}
           </p>
         ) : null}
@@ -103,7 +103,7 @@ function UnitCard({ unit }: { unit: UnitRow }) {
         <button
           type="submit"
           disabled={saving}
-          className="min-h-12 w-full rounded-lg bg-neutral-900 px-4 font-medium text-white disabled:opacity-60"
+          className="inline-flex min-h-12 w-full touch-manipulation items-center justify-center rounded-xl bg-brand px-4 font-semibold text-white transition-colors hover:bg-brand-strong disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save"}
         </button>
@@ -111,7 +111,7 @@ function UnitCard({ unit }: { unit: UnitRow }) {
 
       <form
         action={rotate}
-        className="mt-3 border-t border-neutral-200 pt-3"
+        className="mt-4 border-t border-line pt-4"
         onSubmit={(event) => {
           if (
             !window.confirm(
@@ -125,14 +125,14 @@ function UnitCard({ unit }: { unit: UnitRow }) {
       >
         <input type="hidden" name="unitId" value={unit._id} />
         {rotateState?.error ? (
-          <p role="alert" className="mb-2 text-sm text-red-700">
+          <p role="alert" className="mb-2 text-sm font-medium text-bad">
             {rotateState.error}
           </p>
         ) : null}
         <button
           type="submit"
           disabled={rotating}
-          className="min-h-11 w-full rounded-lg border border-red-400 px-4 text-sm font-medium text-red-700 disabled:opacity-60"
+          className="inline-flex min-h-11 w-full touch-manipulation items-center justify-center rounded-xl border border-bad/40 bg-white px-4 text-sm font-semibold text-bad transition-colors hover:bg-bad-soft disabled:opacity-50"
         >
           {rotating ? "Rotating…" : "Rotate token (tenant moved out)"}
         </button>
@@ -143,7 +143,7 @@ function UnitCard({ unit }: { unit: UnitRow }) {
 
 export function UnitsEditor({ units }: { units: UnitRow[] }) {
   return (
-    <ul className="space-y-4">
+    <ul className="grid gap-4 md:grid-cols-2">
       {units.map((unit) => (
         <UnitCard key={unit._id} unit={unit} />
       ))}

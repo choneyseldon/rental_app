@@ -1,41 +1,37 @@
 "use client";
 
 import { useActionState } from "react";
+import { Brand, buttonStyles } from "@/components/ui";
 import { logIn } from "../actions";
 
 export default function AdminLoginPage() {
   const [state, formAction, pending] = useActionState(logIn, null);
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-6">
-      <form action={formAction} className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-semibold">Admin</h1>
-
-        <label htmlFor="passcode" className="block text-sm font-medium">
-          Passcode
-        </label>
-        <input
-          id="passcode"
-          name="passcode"
-          type="password"
-          autoComplete="current-password"
-          autoFocus
-          required
-          className="min-h-12 w-full rounded-lg border border-neutral-400 px-4 text-base"
-        />
-
+    <main className="grid min-h-screen place-items-center p-6">
+      <form action={formAction} className="card w-full max-w-sm space-y-4 p-6">
+        <Brand tagline="Manage Rentals. Effortlessly." />
+        <div>
+          <label htmlFor="passcode" className="block text-sm font-semibold">
+            Passcode
+          </label>
+          <input
+            id="passcode"
+            name="passcode"
+            type="password"
+            autoComplete="current-password"
+            autoFocus
+            required
+            className="mt-1 min-h-12 w-full rounded-xl border border-line bg-white px-4 text-base outline-none focus:border-brand"
+          />
+        </div>
         {state?.error ? (
-          <p role="alert" className="text-sm text-red-700">
+          <p role="alert" className="text-sm font-medium text-bad">
             {state.error}
           </p>
         ) : null}
-
-        <button
-          type="submit"
-          disabled={pending}
-          className="min-h-12 w-full rounded-lg bg-neutral-900 px-4 font-medium text-white disabled:opacity-60"
-        >
-          {pending ? "Checking…" : "Log in"}
+        <button type="submit" disabled={pending} className={`${buttonStyles.primary} w-full`}>
+          {pending ? "Checking\u2026" : "Log in"}
         </button>
       </form>
     </main>

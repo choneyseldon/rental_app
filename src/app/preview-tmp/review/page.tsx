@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { AdminShell } from "../../admin/(protected)/AdminShell";
 import { ReviewQueue, type PendingRow } from "../../admin/(protected)/review/ReviewQueue";
 
 /** Layout proofing for the review queue. See ../page.tsx for why this exists. */
@@ -45,8 +46,10 @@ const rows: PendingRow[] = [
 export default function ReviewPreviewPage() {
   if (process.env.ENABLE_PREVIEW !== "1") notFound();
   return (
-    <div className="mx-auto w-full max-w-3xl p-4">
+    <AdminShell pending={2}>
+      <div>
       <ReviewQueue rows={rows} />
-    </div>
+      </div>
+    </AdminShell>
   );
 }

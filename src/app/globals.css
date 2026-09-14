@@ -1,23 +1,49 @@
 @import "tailwindcss";
 
 /*
- * Deliberately light-only, not theme-following.
- *
- * Tenants read this outdoors, at a door, often in bright daylight, which is
- * where dark backgrounds lose badly. The printed QR cards assume white paper
- * as well. `color-scheme: light` also keeps native controls — text inputs and
- * the file picker — light, so a phone in dark mode cannot render a dark input
- * inside a white card.
+ * Light-only by design: tenants read this outdoors at a door, often in bright
+ * daylight, and the printed QR cards assume white paper. color-scheme: light
+ * keeps native controls light too.
  */
 :root {
   color-scheme: light;
-  --background: #ffffff;
-  --foreground: #171717;
+
+  --background: #f2f6fd;
+  --foreground: #0f172a;
+
+  --brand: #2563eb;
+  --brand-strong: #1d4ed8;
+  --brand-soft: #e8f0fe;
+  --brand-tint: #f5f8ff;
+
+  --surface: #ffffff;
+  --line: #e3eaf7;
+  --muted: #64748b;
+
+  --ok: #16a34a;
+  --ok-soft: #dcfce7;
+  --warn: #d97706;
+  --warn-soft: #fef3c7;
+  --bad: #dc2626;
+  --bad-soft: #fee2e2;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-tint: var(--brand-tint);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-muted: var(--muted);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -30,4 +56,14 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Card shadow is deliberately faint: the design leans on the blue tint of the
+   page behind the card, not on heavy elevation. */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
 }

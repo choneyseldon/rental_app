@@ -21,7 +21,7 @@ export default async function AdminUnitsPage() {
     }));
   } catch {
     return (
-      <p role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-800">
+      <p role="alert" className="card border-bad/30 bg-bad-soft p-4 text-sm text-[#991b1b]">
         Could not load units. Check that <code>npx convex dev</code> is running
         and that <code>ADMIN_API_SECRET</code> is set both locally and on the
         Convex deployment.
@@ -31,7 +31,7 @@ export default async function AdminUnitsPage() {
 
   if (units.length === 0) {
     return (
-      <p className="rounded-lg bg-neutral-100 p-4 text-sm">
+      <p className="card p-4 text-sm">
         No units yet. Run <code>npx convex run seed:seedUnits</code>.
       </p>
     );

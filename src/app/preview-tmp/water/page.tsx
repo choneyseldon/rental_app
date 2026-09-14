@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { AdminShell } from "../../admin/(protected)/AdminShell";
 import { WaterBillForm, type WaterBill } from "../../admin/(protected)/water/WaterBillForm";
 
 /** Layout proofing for the water bill page. See ../page.tsx for why. */
@@ -28,8 +29,10 @@ const bill: WaterBill = {
 export default function WaterPreviewPage() {
   if (process.env.ENABLE_PREVIEW !== "1") notFound();
   return (
-    <div className="mx-auto w-full max-w-3xl p-4">
+    <AdminShell pending={2}>
+      <div>
       <WaterBillForm bill={bill} />
-    </div>
+      </div>
+    </AdminShell>
   );
 }

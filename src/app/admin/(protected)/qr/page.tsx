@@ -50,7 +50,7 @@ export default async function QrSheetPage() {
     units = await client.query(api.admin.listUnits, { secret });
   } catch {
     return (
-      <p role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-800">
+      <p role="alert" className="card border-bad/30 bg-bad-soft p-4 text-sm text-[#991b1b]">
         Could not load units. Check <code>npx convex dev</code> is running.
       </p>
     );
@@ -58,7 +58,7 @@ export default async function QrSheetPage() {
 
   if (units.length === 0) {
     return (
-      <p className="rounded-lg bg-neutral-100 p-4 text-sm">
+      <p className="card p-4 text-sm">
         No units yet. Run <code>npx convex run seed:seedUnits</code>.
       </p>
     );

@@ -28,12 +28,12 @@ function SubmissionCard({ row }: { row: PendingRow }) {
     row.expectedAmount !== null && row.expectedAmount !== row.claimedAmount;
 
   return (
-    <li className="rounded-xl border border-neutral-300 p-4">
+    <li className="card p-4 sm:p-5">
       <div className="mb-3">
         <h2 className="text-lg font-semibold">
           Unit {row.unitNumber} · <span className="capitalize">{row.type}</span>
         </h2>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted">
           {row.tenantName || "No name recorded"} · {row.month}
         </p>
       </div>
@@ -42,7 +42,7 @@ function SubmissionCard({ row }: { row: PendingRow }) {
         {money(row.claimedAmount)}
       </p>
       {mismatch ? (
-        <p className="mt-1 rounded-md bg-amber-100 px-2 py-1 text-sm font-medium text-amber-900">
+        <p className="mt-1 inline-block rounded-lg bg-warn-soft px-2 py-1 text-sm font-semibold text-[#92400e]">
           Rent on file is {money(row.expectedAmount!)}
         </p>
       ) : null}
@@ -59,14 +59,14 @@ function SubmissionCard({ row }: { row: PendingRow }) {
           <img
             src={row.imageUrl}
             alt={`Payment screenshot for unit ${row.unitNumber}`}
-            className="max-h-80 w-full rounded-lg border border-neutral-300 object-contain"
+            className="max-h-80 w-full rounded-xl border border-line bg-brand-tint object-contain"
           />
-          <span className="mt-1 block text-sm text-neutral-600 underline">
+          <span className="mt-1 block text-sm text-muted underline">
             Open full size
           </span>
         </a>
       ) : (
-        <p className="mt-3 text-sm text-red-700">Image missing.</p>
+        <p className="mt-3 text-sm font-medium text-bad">Image missing.</p>
       )}
 
       <form action={submit} className="mt-4 space-y-3">
@@ -75,10 +75,10 @@ function SubmissionCard({ row }: { row: PendingRow }) {
         <div>
           <label
             htmlFor={`note-${row.submissionId}`}
-            className="block text-sm font-medium text-neutral-700"
+            className="block text-sm font-semibold text-muted"
           >
             Note to tenant{" "}
-            <span className="text-neutral-500">(required to reject)</span>
+            <span className="text-muted">(required to reject)</span>
           </label>
           <input
             id={`note-${row.submissionId}`}
@@ -86,12 +86,12 @@ function SubmissionCard({ row }: { row: PendingRow }) {
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="e.g. This screenshot is for last month"
-            className="min-h-12 w-full rounded-lg border border-neutral-400 px-3 text-base"
+            className="mt-1 min-h-12 w-full rounded-xl border border-line bg-white px-3 text-base outline-none focus:border-brand"
           />
         </div>
 
         {state?.error ? (
-          <p role="alert" className="text-sm font-medium text-red-700">
+          <p role="alert" className="text-sm font-medium text-bad">
             {state.error}
           </p>
         ) : null}
@@ -102,7 +102,7 @@ function SubmissionCard({ row }: { row: PendingRow }) {
             name="decision"
             value="approved"
             disabled={pending}
-            className="min-h-12 flex-1 touch-manipulation rounded-lg bg-green-700 font-bold text-white disabled:opacity-60"
+            className="inline-flex min-h-12 flex-1 touch-manipulation items-center justify-center rounded-xl bg-ok font-bold text-white transition hover:brightness-95 disabled:opacity-50"
           >
             {pending ? "Saving…" : "Approve"}
           </button>
@@ -112,7 +112,7 @@ function SubmissionCard({ row }: { row: PendingRow }) {
             value="rejected"
             disabled={pending || !note.trim()}
             title={!note.trim() ? "Add a note first" : undefined}
-            className="min-h-12 flex-1 touch-manipulation rounded-lg border-2 border-red-600 font-bold text-red-700 disabled:opacity-40"
+            className="inline-flex min-h-12 flex-1 touch-manipulation items-center justify-center rounded-xl border border-bad/50 bg-white font-bold text-bad transition hover:bg-bad-soft disabled:opacity-40"
           >
             Reject
           </button>
@@ -124,7 +124,7 @@ function SubmissionCard({ row }: { row: PendingRow }) {
 
 export function ReviewQueue({ rows }: { rows: PendingRow[] }) {
   return (
-    <ul className="space-y-4">
+    <ul className="grid gap-4 xl:grid-cols-2">
       {rows.map((row) => (
         <SubmissionCard key={row.submissionId} row={row} />
       ))}
