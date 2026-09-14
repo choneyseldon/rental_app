@@ -10,7 +10,7 @@ const SLIP = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAJYCAYAAADYJts/
 const rows: PendingRow[] = [
   {
     submissionId: "s1",
-    unitNumber: "4",
+    unitNumber: "2B",
     tenantName: "Pema Wangmo",
     month: "2026-09",
     type: "rent",
@@ -21,7 +21,7 @@ const rows: PendingRow[] = [
   },
   {
     submissionId: "s2",
-    unitNumber: "7",
+    unitNumber: "4A",
     tenantName: "Sonam Dorji",
     month: "2026-09",
     type: "rent",
@@ -32,7 +32,7 @@ const rows: PendingRow[] = [
   },
   {
     submissionId: "s3",
-    unitNumber: "2",
+    unitNumber: "1B",
     tenantName: "",
     month: "2026-09",
     type: "water",

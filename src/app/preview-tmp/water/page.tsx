@@ -8,13 +8,13 @@ export const dynamic = "force-dynamic";
 // Nu. 3,710.55 across 7 units does not divide evenly, so this exercises the
 // remainder distribution and the "adds up to" reconciliation line.
 const shares = [
-  { unitNumber: "1", tenantName: "Pema Wangmo", amount: 530.08 },
-  { unitNumber: "2", tenantName: "Sonam Dorji", amount: 530.08 },
-  { unitNumber: "3", tenantName: "Karma Lhamo", amount: 530.08 },
-  { unitNumber: "4", tenantName: "Tashi Phuntsho", amount: 530.08 },
-  { unitNumber: "6", tenantName: "Dechen Zangmo", amount: 530.08 },
-  { unitNumber: "8", tenantName: "", amount: 530.08 },
-  { unitNumber: "9", tenantName: "Ugyen Tshering", amount: 530.07 },
+  { unitNumber: "1A", tenantName: "Pema Wangmo", amount: 530.08 },
+  { unitNumber: "1B", tenantName: "Sonam Dorji", amount: 530.08 },
+  { unitNumber: "2A", tenantName: "Karma Lhamo", amount: 530.08 },
+  { unitNumber: "2B", tenantName: "Tashi Phuntsho", amount: 530.08 },
+  { unitNumber: "3A", tenantName: "Dechen Zangmo", amount: 530.08 },
+  { unitNumber: "4B", tenantName: "", amount: 530.08 },
+  { unitNumber: "6B", tenantName: "Ugyen Tshering", amount: 530.07 },
 ];
 
 const bill: WaterBill = {

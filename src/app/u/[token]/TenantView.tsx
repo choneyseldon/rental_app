@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { useState } from "react";
 import { api } from "../../../../convex/_generated/api";
 import { PaymentUpload } from "./PaymentUpload";
+import { PROPERTY, RENT_ACCOUNT } from "../../../../convex/property";
 import { AppShell, type NavItem } from "@/components/AppShell";
 import { Card, IconTile, Pill, buttonStyles, money, type Tone } from "@/components/ui";
 import {
@@ -181,6 +182,20 @@ export function TenantCards({
                 </p>
               </div>
             </div>
+            <div className="mt-5 rounded-xl bg-brand-tint p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                Transfer to
+              </p>
+              <p className="mt-1 font-semibold">{RENT_ACCOUNT.holder}</p>
+              <p className="text-sm text-muted">{RENT_ACCOUNT.bank}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <span className="select-all font-mono text-xl font-bold tabular-nums">
+                  {RENT_ACCOUNT.number}
+                </span>
+                <CopyButton value={RENT_ACCOUNT.number} />
+              </div>
+            </div>
+
             <div className="mt-5 space-y-6">
               {dueRent ? (
                 <div>
@@ -292,9 +307,21 @@ export function TenantCards({
             <Card id="help">
               <h2 className="font-bold">Need help?</h2>
               <p className="mt-1 text-sm text-muted">
-                Ask the owner directly. There is no account to recover and no password to reset —
-                the code on your door is all you need.
+                Ask {PROPERTY.owner} directly. There is no account to recover and no password to
+                reset — the code on your door is all you need.
               </p>
+              <div className="mt-4 border-t border-line pt-4">
+                <p className="font-semibold">{PROPERTY.name}</p>
+                <p className="mt-1 text-sm text-muted">{PROPERTY.address}</p>
+                <a
+                  href={PROPERTY.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-brand underline"
+                >
+                  Open in Maps
+                </a>
+              </div>
             </Card>
           </div>
         </div>

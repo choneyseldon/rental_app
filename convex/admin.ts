@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { nanoid } from "nanoid";
 import { mutation, query, type QueryCtx, type MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import { compareUnits } from "./property";
 import { currentMonthKey, deriveStatus } from "./tenant";
 
 /**
@@ -33,7 +34,7 @@ export const listUnits = query({
     assertAdmin(ctx, secret);
     const units = await ctx.db.query("units").collect();
     return units.sort(
-      (a, b) => Number(a.unitNumber) - Number(b.unitNumber),
+      (a, b) => compareUnits(a.unitNumber, b.unitNumber),
     );
   },
 });
@@ -210,7 +211,7 @@ export const getWaterBill = query({
     const units = await ctx.db.query("units").collect();
     const occupied = units
       .filter((u) => u.isOccupied)
-      .sort((a, b) => Number(a.unitNumber) - Number(b.unitNumber));
+      .sort((a, b) => compareUnits(a.unitNumber, b.unitNumber));
 
     const published = period?.isPublished === true;
 
@@ -228,7 +229,7 @@ export const getWaterBill = query({
           amount: s.amount,
         };
       });
-      shares.sort((a, b) => Number(a.unitNumber) - Number(b.unitNumber));
+      shares.sort((a, b) => compareUnits(a.unitNumber, b.unitNumber));
     } else {
       const amounts = splitEvenly(period?.waterTotal ?? 0, occupied.length);
       shares = occupied.map((u, i) => ({
@@ -313,7 +314,7 @@ export const publishWaterBill = mutation({
 
     const occupied = (await ctx.db.query("units").collect())
       .filter((u) => u.isOccupied)
-      .sort((a, b) => Number(a.unitNumber) - Number(b.unitNumber));
+      .sort((a, b) => compareUnits(a.unitNumber, b.unitNumber));
 
     if (occupied.length === 0) {
       throw new Error(
@@ -359,7 +360,7 @@ export const dashboard = query({
     const month = currentMonthKey();
     const units = (await ctx.db.query("units").collect())
       .filter((u) => u.isOccupied)
-      .sort((a, b) => Number(a.unitNumber) - Number(b.unitNumber));
+      .sort((a, b) => compareUnits(a.unitNumber, b.unitNumber));
 
     const periods = await ctx.db.query("periods").collect();
     const thisPeriod = periods.find((p) => p.month === month) ?? null;

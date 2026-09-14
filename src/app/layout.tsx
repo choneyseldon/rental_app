@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rental & Utility Management",
-  description: "Rent and utility tracking for tenants and the property owner.",
+  title: "ChimBill",
+  description: "Rent and utility management for Dorji Khangzang, Thimphu.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

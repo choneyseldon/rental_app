@@ -1,7 +1,7 @@
 import { TenantView } from "./TenantView";
 
 export const metadata = {
-  title: "Your rent & water",
+  title: "ChimBill — your rent & water",
   // A door card is not something search engines should be indexing.
   robots: { index: false, follow: false },
 };

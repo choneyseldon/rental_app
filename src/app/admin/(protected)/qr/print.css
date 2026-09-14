@@ -35,14 +35,19 @@
   shape-rendering: crispEdges;
 }
 
-.qr-dz {
-  font-size: 16pt;
-  line-height: 1.55;
+.qr-lead {
+  font-size: 12pt;
   font-weight: 700;
+  line-height: 1.3;
+  margin-top: 1mm;
 }
 .qr-en {
   font-size: 9pt;
-  line-height: 1.25;
+  line-height: 1.3;
+}
+.qr-house {
+  margin-top: 1.5mm;
+  color: #555;
 }
 .qr-unit {
   font-size: 15pt;

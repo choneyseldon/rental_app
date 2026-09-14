@@ -10,7 +10,7 @@ export default function AdminLoginPage() {
   return (
     <main className="grid min-h-screen place-items-center p-6">
       <form action={formAction} className="card w-full max-w-sm space-y-4 p-6">
-        <Brand tagline="Manage Rentals. Effortlessly." />
+        <Brand tagline="Rent & Utility Management" />
         <div>
           <label htmlFor="passcode" className="block text-sm font-semibold">
             Passcode

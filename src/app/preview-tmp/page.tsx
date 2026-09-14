@@ -7,7 +7,7 @@ import { TenantCards, type TenantData } from "../u/[token]/TenantView";
  * contract. Not reachable in production.
  */
 const fixture: TenantData = {
-  unitNumber: "4",
+  unitNumber: "2B",
   tenantName: "Pema Wangmo",
   bpcConsumerNumber: "1043872210",
   month: "2026-09",

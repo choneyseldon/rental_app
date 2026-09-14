@@ -11,6 +11,7 @@ import {
   IconQr,
   IconReceipt,
 } from "@/components/icons";
+import { PROPERTY } from "../../../../convex/property";
 import { logOut } from "../actions";
 
 const COPY: Record<string, { title: string; subtitle: string }> = {
@@ -42,8 +43,8 @@ export function AdminShell({
   return (
     <AppShell
       nav={nav}
-      user="Owner"
-      tagline="Manage Rentals. Effortlessly."
+      user={PROPERTY.owner}
+      tagline={PROPERTY.name}
       greeting={copy.title}
       subtitle={copy.subtitle}
       actions={

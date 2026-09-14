@@ -141,15 +141,52 @@ export function Avatar({ name, className = "" }: { name: string; className?: str
 export function Brand({ tagline }: { tagline?: string }) {
   return (
     <div className="flex items-center gap-2.5">
-      <span className="flex size-9 items-center justify-center rounded-xl bg-brand text-white">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
-          <path d="M3 10.5 12 3l9 7.5" /><path d="M5.5 9.5V20h13V9.5" />
-        </svg>
-      </span>
+      <ChimBillMark className="size-10 shrink-0" />
       <span>
-        <span className="block text-lg font-bold leading-none tracking-tight">Rentify</span>
+        <span className="block text-lg font-bold leading-none tracking-tight">
+          Chim<span className="text-brand">Bill</span>
+        </span>
         {tagline ? <span className="block text-[11px] leading-tight text-muted">{tagline}</span> : null}
       </span>
     </div>
+  );
+}
+
+/**
+ * The house-and-QR mark, drawn rather than loaded, so it stays crisp at favicon
+ * size and on a printed card and needs no image request. Swap in the supplied
+ * artwork by dropping it at public/logo.png and using it here instead.
+ */
+export function ChimBillMark({ className = "size-10" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} role="img" aria-label="ChimBill">
+      {/* Roof and walls */}
+      <path
+        d="M6 27 32 7l26 20"
+        fill="none"
+        stroke="var(--brand-ink)"
+        strokeWidth="6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 27v28h40V27"
+        fill="none"
+        stroke="var(--brand-ink)"
+        strokeWidth="6"
+        strokeLinejoin="round"
+      />
+      {/* Rabsel window, the traditional Bhutanese bay */}
+      <rect x="18" y="31" width="14" height="14" rx="1" fill="#e9a23b" />
+      <path d="M17 31h16l-3-4H20z" fill="#e9a23b" />
+      <path d="M25 31v14M18 38h14" stroke="var(--brand-ink)" strokeWidth="1.6" />
+      {/* QR corner */}
+      <rect x="36" y="31" width="6" height="6" fill="var(--brand-ink)" />
+      <rect x="44" y="31" width="4" height="4" fill="var(--brand-ink)" />
+      <rect x="36" y="41" width="4" height="4" fill="var(--brand-ink)" />
+      <rect x="43" y="40" width="6" height="6" fill="var(--brand-ink)" />
+      <rect x="37" y="48" width="4" height="4" fill="var(--brand-ink)" />
+      <rect x="45" y="48" width="4" height="4" fill="var(--brand-ink)" />
+    </svg>
   );
 }

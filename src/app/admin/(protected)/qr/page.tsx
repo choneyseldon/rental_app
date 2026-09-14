@@ -1,8 +1,8 @@
 import QRCode from "qrcode";
-import { notoSerifTibetan } from "@/app/fonts";
 import { api } from "../../../../../convex/_generated/api";
 import { adminClient } from "@/lib/convex-admin";
-import { DZONGKHA_REVIEWED, qrLabels } from "@/lib/qr-labels";
+import { PROPERTY } from "../../../../../convex/property";
+import { qrLabels } from "@/lib/qr-labels";
 import "./print.css";
 
 /**
@@ -78,31 +78,23 @@ export default async function QrSheetPage() {
     })),
   );
 
-  const blocked = !safeToPrint || !DZONGKHA_REVIEWED;
+  // Only one gate left now the Dzongkha lines are gone: the codes must point
+  // at production, or a mounted sticker leads nowhere.
+  const blocked = !safeToPrint;
 
   return (
-    <div className={notoSerifTibetan.variable}>
+    <div>
       {blocked ? (
         <div
           role="alert"
           className="qr-no-print card mb-5 space-y-2 border-bad/40 bg-bad-soft p-5 text-sm text-[#991b1b]"
         >
           <p className="text-base font-bold">Proof only — do not mount these.</p>
-          <ul className="list-disc space-y-1 pl-5">
-            {!safeToPrint ? <li>{reason}</li> : null}
-            {!DZONGKHA_REVIEWED ? (
-              <li>
-                The Dzongkha wording in <code>src/lib/qr-labels.ts</code> is an
-                unreviewed placeholder. Have a Dzongkha speaker check it, then
-                set <code>DZONGKHA_REVIEWED</code> to <code>true</code>.
-              </li>
-            ) : null}
-          </ul>
+          <p>{reason}</p>
         </div>
       ) : (
         <p className="qr-no-print card mb-5 border-ok/40 bg-ok-soft p-5 text-sm text-[#166534]">
-          Codes point at <code>{baseUrl}</code> and the Dzongkha has been
-          reviewed. Safe to print and mount.
+          Codes point at <code>{baseUrl}</code>. Safe to print and mount.
         </p>
       )}
 
@@ -120,13 +112,11 @@ export default async function QrSheetPage() {
             <div dangerouslySetInnerHTML={{ __html: card.svg }} />
             <div>
               <p className="qr-unit">
-                {qrLabels.unitPrefix.en} {card.unitNumber}
+                {qrLabels.unitPrefix} {card.unitNumber}
               </p>
-              <p className="qr-dz" style={{ fontFamily: "var(--font-noto-tibetan)" }}>
-                {qrLabels.instruction.dz}
-              </p>
-              <p className="qr-en font-semibold">{qrLabels.instruction.en}</p>
-              <p className="qr-en text-neutral-700">{qrLabels.noLogin.en}</p>
+              <p className="qr-lead">{qrLabels.instruction}</p>
+              <p className="qr-en">{qrLabels.noLogin}</p>
+              <p className="qr-en qr-house">{PROPERTY.name}</p>
             </div>
             {blocked ? <span className="qr-proof-stamp">PROOF — DO NOT MOUNT</span> : null}
           </div>
