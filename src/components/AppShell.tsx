@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { Avatar, Brand } from "./ui";
-import { IconBell } from "./icons";
+import { IconBell, IconMore } from "./icons";
 
 export type NavItem = {
   href: string;
@@ -43,7 +44,14 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const tabs = nav.filter((n) => n.primary !== false).slice(0, 5);
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  // The bar holds five. Beyond that the last slot becomes "More", so nothing
+  // ends up unreachable on a phone just because it did not fit.
+  const barItems = nav.filter((n) => n.primary !== false);
+  const needsMore = barItems.length > 5;
+  const tabs = needsMore ? barItems.slice(0, 4) : barItems;
+  const overflow = needsMore ? barItems.slice(4) : [];
 
   // The tenant nav scrolls to sections on one page rather than routing, so the
   // first entry stands in for "you are here".
@@ -117,8 +125,33 @@ export function AppShell({
         </main>
       </div>
 
+      {/* Overflow sheet, shown above the bar */}
+      {moreOpen ? (
+        <>
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setMoreOpen(false)}
+            className="fixed inset-0 z-30 bg-slate-900/20 lg:hidden"
+          />
+          <div className="fixed inset-x-0 bottom-14 z-40 border-t border-line bg-white p-2 lg:hidden">
+            {overflow.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMoreOpen(false)}
+                className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-700"
+              >
+                <span className="text-slate-400">{item.icon}</span>
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </>
+      ) : null}
+
       {/* Mobile bottom tabs */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-white lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-line bg-white lg:hidden">
         {tabs.map((item) => {
           const active = activeFor(item.href);
           return (
@@ -140,6 +173,19 @@ export function AppShell({
             </Link>
           );
         })}
+        {needsMore ? (
+          <button
+            type="button"
+            onClick={() => setMoreOpen((v) => !v)}
+            aria-expanded={moreOpen}
+            className={`flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold ${
+              moreOpen || overflow.some((i) => activeFor(i.href)) ? "text-brand" : "text-slate-400"
+            }`}
+          >
+            <IconMore />
+            More
+          </button>
+        ) : null}
       </nav>
     </div>
   );

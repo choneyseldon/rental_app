@@ -9,7 +9,7 @@ import { AppShell, type NavItem } from "@/components/AppShell";
 import { Card, IconTile, Pill, buttonStyles, money, type Tone } from "@/components/ui";
 import {
   IconBolt, IconCamera, IconCash, IconCheck, IconChevron, IconCopy,
-  IconDoc, IconDrop, IconHelp, IconHome, IconReceipt,
+  IconDoc, IconDrop, IconHome, IconPin, IconReceipt,
 } from "@/components/icons";
 
 type Status = "approved" | "pending" | "rejected" | "none";
@@ -124,7 +124,7 @@ export function TenantCards({
     { href: "#pay", label: "Pay", icon: <IconCash /> },
     { href: "#payments", label: "Payments", icon: <IconReceipt /> },
     { href: "#electricity", label: "Power", icon: <IconBolt /> },
-    { href: "#help", label: "Help", icon: <IconHelp /> },
+    { href: "#house", label: "House", icon: <IconPin /> },
   ];
 
   const dueRent = data.rent.status !== "approved" && data.rent.status !== "pending";
@@ -304,24 +304,45 @@ export function TenantCards({
               </Card>
             ) : null}
 
-            <Card id="help">
-              <h2 className="font-bold">Need help?</h2>
-              <p className="mt-1 text-sm text-muted">
-                Ask {PROPERTY.owner} directly. There is no account to recover and no password to
-                reset — the code on your door is all you need.
-              </p>
-              <div className="mt-4 border-t border-line pt-4">
-                <p className="font-semibold">{PROPERTY.name}</p>
-                <p className="mt-1 text-sm text-muted">{PROPERTY.address}</p>
-                <a
-                  href={PROPERTY.mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-brand underline"
-                >
-                  Open in Maps
-                </a>
+            <Card id="house">
+              <div className="flex items-start gap-3">
+                <IconTile><IconPin /></IconTile>
+                <div className="min-w-0">
+                  <h2 className="font-bold">{PROPERTY.name}</h2>
+                  <p className="text-sm text-muted">Owner · {PROPERTY.owner}</p>
+                </div>
               </div>
+
+              <p className="mt-4 text-sm leading-relaxed text-muted">{PROPERTY.address}</p>
+              <a
+                href={PROPERTY.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${buttonStyles.ghost} mt-3 w-full`}
+              >
+                Open in Maps
+              </a>
+
+              {/* The account again, as reference. The copy in the payment card
+                  is for the moment of paying; this is for looking it up. */}
+              <div className="mt-5 border-t border-line pt-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                  Rent transfer account
+                </p>
+                <p className="mt-1 font-semibold">{RENT_ACCOUNT.holder}</p>
+                <p className="text-sm text-muted">{RENT_ACCOUNT.bank}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <span className="select-all font-mono text-xl font-bold tabular-nums">
+                    {RENT_ACCOUNT.number}
+                  </span>
+                  <CopyButton value={RENT_ACCOUNT.number} />
+                </div>
+              </div>
+
+              <p className="mt-5 border-t border-line pt-5 text-sm text-muted">
+                Need help? Ask {PROPERTY.owner} directly. There is no account to recover and no
+                password to reset — the code on your door is all you need.
+              </p>
             </Card>
           </div>
         </div>
