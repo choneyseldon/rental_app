@@ -37,7 +37,7 @@ function TallyCard({
   href: string;
 }) {
   return (
-    <Card>
+    <Card className="min-w-0">
       <Link href={href} className="flex items-start gap-3">
         <IconTile>{icon}</IconTile>
         <div className="min-w-0 flex-1">
@@ -46,7 +46,7 @@ function TallyCard({
         </div>
         <IconChevron className="h-4 w-4 shrink-0 text-slate-300" />
       </Link>
-      <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-line pt-4">
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-line pt-4 sm:gap-x-6">
         <Tally value={counts.paid} label="paid" tone="ok" />
         <Tally value={counts.pending} label="checking" tone="warn" />
         <Tally value={counts.missing} label="not paid" tone="bad" />
@@ -112,7 +112,7 @@ export function Overview({ data }: { data: DashboardData }) {
         {data.month} · {data.occupiedCount} occupied
       </p>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid min-w-0 gap-4 md:grid-cols-2">
         <TallyCard
           icon={<IconHome />}
           title="Rent"

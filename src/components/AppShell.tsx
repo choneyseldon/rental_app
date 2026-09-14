@@ -102,17 +102,15 @@ export function AppShell({
             </span>
             <Avatar name={user} />
             <span className="hidden text-sm font-semibold sm:block">{user}</span>
+            {actions ? <div className="ml-1">{actions}</div> : null}
           </div>
         </header>
 
         <main className="flex-1 px-4 py-5 pb-24 sm:px-6 lg:px-8 lg:pb-8">
           <div className="mx-auto w-full max-w-6xl">
-            <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight sm:text-[28px]">{greeting}</h1>
-                <p className="mt-1 text-sm text-muted sm:text-base">{subtitle}</p>
-              </div>
-              {actions}
+            <div className="mb-5">
+              <h1 className="text-2xl font-bold tracking-tight sm:text-[28px]">{greeting}</h1>
+              <p className="mt-1 text-sm text-muted sm:text-base">{subtitle}</p>
             </div>
             {children}
           </div>

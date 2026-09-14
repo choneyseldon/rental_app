@@ -48,9 +48,13 @@ export function AdminShell({
       subtitle={copy.subtitle}
       actions={
         <form action={logOut}>
-          <button type="submit" className={buttonStyles.ghost}>
+          <button
+            type="submit"
+            title="Log out"
+            className={`${buttonStyles.ghost} !px-3 sm:!px-4`}
+          >
             <IconLogout className="h-4 w-4" />
-            Log out
+            <span className="sr-only sm:not-sr-only">Log out</span>
           </button>
         </form>
       }
