@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Avatar, Card, Pill, buttonStyles, money } from "@/components/ui";
-import { IconCheck } from "@/components/icons";
+import { IconAlert, IconCheck, IconSend } from "@/components/icons";
+import { whatsAppLink } from "@/lib/phone";
 import { rotateToken, saveUnit } from "../../actions";
 
 export type UnitRow = {
@@ -23,6 +24,14 @@ function UnitCard({ unit }: { unit: UnitRow }) {
   const [saveState, save, saving] = useActionState(saveUnit, null);
   const [rotateState, rotate, rotating] = useActionState(rotateToken, null);
 
+  // Checked as it is typed, so a number that WhatsApp cannot reach is caught
+  // at registration rather than discovered later when a nudge goes nowhere.
+  const [phone, setPhone] = useState(unit.tenantPhone);
+  const chat = whatsAppLink(
+    phone,
+    `Kuzuzangpo${unit.tenantName ? " " + unit.tenantName : ""}, about unit ${unit.unitNumber}.`,
+  );
+
   return (
     <Card as="li" className="!p-0">
       <div className="flex items-center gap-3 border-b border-line p-4 sm:p-5">
@@ -41,6 +50,16 @@ function UnitCard({ unit }: { unit: UnitRow }) {
         )}
       </div>
 
+      {chat ? (
+        <div className="border-b border-line px-4 py-3 sm:px-5">
+          <a href={chat} target="_blank" rel="noopener noreferrer"
+            className={`${buttonStyles.ghost} w-full !text-brand`}>
+            <IconSend className="h-4 w-4" />
+            Message on WhatsApp
+          </a>
+        </div>
+      ) : null}
+
       <form action={save} className="p-4 sm:p-5">
         <input type="hidden" name="unitId" value={unit._id} />
 
@@ -50,9 +69,16 @@ function UnitCard({ unit }: { unit: UnitRow }) {
             <input id={`name-${unit._id}`} name="tenantName" defaultValue={unit.tenantName} className={field} />
           </div>
           <div>
-            <label className={label} htmlFor={`phone-${unit._id}`}>Phone</label>
+            <label className={label} htmlFor={`phone-${unit._id}`}>Phone (WhatsApp)</label>
             <input id={`phone-${unit._id}`} name="tenantPhone" type="tel" inputMode="tel"
-              defaultValue={unit.tenantPhone} className={field} />
+              value={phone} onChange={(e) => setPhone(e.target.value)}
+              placeholder="17 12 34 56" className={field} />
+            {phone.trim() && !chat ? (
+              <p className="mt-1 flex items-start gap-1 text-xs font-medium text-warn">
+                <IconAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                WhatsApp cannot reach this. Use an 8-digit mobile.
+              </p>
+            ) : null}
           </div>
           <div>
             <label className={label} htmlFor={`rent-${unit._id}`}>Rent (Nu.)</label>

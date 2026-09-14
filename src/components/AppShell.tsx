@@ -61,7 +61,7 @@ export function AppShell({
   return (
     <div className="min-h-screen lg:flex">
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-brand-tint px-4 py-6 lg:flex">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-brand-tint px-4 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:overflow-y-auto">
         <div className="px-2">
           <Brand tagline={tagline} />
         </div>
