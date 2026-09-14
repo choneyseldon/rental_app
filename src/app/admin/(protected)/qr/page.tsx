@@ -85,7 +85,7 @@ export default async function QrSheetPage() {
       {blocked ? (
         <div
           role="alert"
-          className="qr-no-print mb-4 space-y-2 rounded-lg border-2 border-red-600 bg-red-50 p-4 text-sm text-red-900"
+          className="qr-no-print card mb-5 space-y-2 border-bad/40 bg-bad-soft p-5 text-sm text-[#991b1b]"
         >
           <p className="text-base font-bold">Proof only — do not mount these.</p>
           <ul className="list-disc space-y-1 pl-5">
@@ -100,13 +100,13 @@ export default async function QrSheetPage() {
           </ul>
         </div>
       ) : (
-        <p className="qr-no-print mb-4 rounded-lg bg-green-50 p-4 text-sm text-green-900">
+        <p className="qr-no-print card mb-5 border-ok/40 bg-ok-soft p-5 text-sm text-[#166534]">
           Codes point at <code>{baseUrl}</code> and the Dzongkha has been
           reviewed. Safe to print and mount.
         </p>
       )}
 
-      <div className="qr-no-print mb-4 text-sm text-neutral-600">
+      <div className="qr-no-print mb-5 text-sm text-muted">
         {cards.length} cards. Print at 100% scale — any &ldquo;fit to page&rdquo;
         shrink changes the physical size of the codes.
       </div>

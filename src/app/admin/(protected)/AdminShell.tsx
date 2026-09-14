@@ -43,6 +43,7 @@ export function AdminShell({
     <AppShell
       nav={nav}
       user="Owner"
+      tagline="Manage Rentals. Effortlessly."
       greeting={copy.title}
       subtitle={copy.subtitle}
       actions={

@@ -30,6 +30,7 @@ export function AppShell({
   greeting,
   subtitle,
   actions,
+  tagline,
   children,
 }: {
   nav: NavItem[];
@@ -37,6 +38,8 @@ export function AppShell({
   greeting: string;
   subtitle: string;
   actions?: React.ReactNode;
+  /** Owner-facing strapline; omitted on the tenant side, where it makes no sense. */
+  tagline?: string;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -52,7 +55,7 @@ export function AppShell({
       {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-brand-tint px-4 py-6 lg:flex">
         <div className="px-2">
-          <Brand tagline="Manage Rentals. Effortlessly." />
+          <Brand tagline={tagline} />
         </div>
         <nav className="mt-8 flex flex-1 flex-col gap-1">
           {nav.map((item) => {
