@@ -115,23 +115,23 @@ export default async function QrSheetPage() {
             className={`qr-card relative ${blocked ? "qr-proof" : ""}`}
           >
             <div dangerouslySetInnerHTML={{ __html: card.svg }} />
-            <div>
+            <div className="qr-body">
               <p className="qr-unit">
                 {qrLabels.unitPrefix} {card.unitNumber}
               </p>
               <p className="qr-lead">{qrLabels.instruction}</p>
               <p className="qr-en">{qrLabels.noLogin}</p>
               <p className="qr-en qr-house">{PROPERTY.name}</p>
+              {blocked ? <span className="qr-proof-stamp">PROOF — DO NOT MOUNT</span> : null}
+              <a
+                href={card.path}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="qr-no-print qr-open block text-brand"
+              >
+                Open this tenant&rsquo;s page
+              </a>
             </div>
-            {blocked ? <span className="qr-proof-stamp">PROOF — DO NOT MOUNT</span> : null}
-            <a
-              href={card.path}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="qr-no-print absolute bottom-1 right-2 text-[11px] font-semibold text-brand underline"
-            >
-              Open
-            </a>
           </div>
         ))}
       </div>

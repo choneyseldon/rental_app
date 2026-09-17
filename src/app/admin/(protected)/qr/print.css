@@ -1,87 +1,123 @@
-/* A4, two columns of five cards. Each card is a door sticker. */
+/*
+ * Two layouts for the same markup.
+ *
+ * On paper a card is a door sticker and its size is not negotiable: 95mm by
+ * 54mm, two to a row on A4, with a 40mm code. Those millimetres are what make
+ * "print at 100% scale" mean anything.
+ *
+ * On screen that same card is 359px wide before its gutters, which is wider
+ * than a phone — the sheet ran off the side of the screen. So the screen gets
+ * a fluid preview, and every millimetre lives in the print block at the
+ * bottom, where no viewport can reflow it.
+ */
+
+/* ---- Screen: a preview that fits whatever it is read on ---- */
+
 .qr-sheet {
-  --card-w: 95mm;
-  --card-h: 54mm;
   display: grid;
-  grid-template-columns: repeat(2, var(--card-w));
-  gap: 3mm;
-  justify-content: center;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 40rem) {
+  .qr-sheet {
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  }
 }
 
 .qr-card {
-  width: var(--card-w);
-  height: var(--card-h);
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4mm;
+  /* An auto track would let the code push the text past the edge of a narrow
+     card; a fixed first track leaves the text a column that can shrink. */
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: 0.875rem;
   align-items: center;
-  padding: 4mm;
-  border: 0.3mm solid #000;
-  border-radius: 2mm;
+  padding: 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
   background: #fff;
   color: #000;
-  /* Never split a card across a page. */
-  break-inside: avoid;
-  page-break-inside: avoid;
+  min-width: 0;
+}
+
+@media (min-width: 25rem) {
+  .qr-card {
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 1.125rem;
+    padding: 1.25rem;
+  }
 }
 
 .qr-card svg {
   display: block;
-  width: 40mm;
-  height: 40mm;
+  width: 100%;
+  height: auto;
   /* Keep modules hard-edged; smoothing eats scan reliability at small sizes. */
   image-rendering: pixelated;
   shape-rendering: crispEdges;
 }
 
-.qr-lead {
-  font-size: 12pt;
-  font-weight: 700;
-  line-height: 1.3;
-  margin-top: 1mm;
+.qr-body {
+  min-width: 0;
 }
-.qr-en {
-  font-size: 9pt;
-  line-height: 1.3;
-}
-.qr-house {
-  margin-top: 1.5mm;
-  color: #555;
-}
+
 .qr-unit {
-  font-size: 15pt;
+  font-size: 1.125rem;
   font-weight: 700;
   letter-spacing: 0.02em;
+}
+.qr-lead {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 0.25rem;
+}
+.qr-en {
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+.qr-house {
+  margin-top: 0.375rem;
+  color: #555;
+  /* The house name is the one line long enough to need this. */
+  overflow-wrap: anywhere;
 }
 
 /* Loud, deliberately hard to ignore: these codes are not safe to mount. */
 .qr-proof {
-  outline: 1mm solid #b91c1c;
-  outline-offset: -1mm;
+  outline: 2px solid #b91c1c;
+  outline-offset: -2px;
 }
 .qr-proof-stamp {
-  position: absolute;
-  /* Clears the 40mm code plus its 4mm padding and 4mm gutter. */
-  inset-inline-start: 48mm;
-  inset-inline-end: 2mm;
-  inset-block-end: 1.5mm;
-  text-align: center;
-  font-size: 7pt;
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.625rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   color: #fff;
   background: #b91c1c;
-  border-radius: 1mm;
-  padding: 0.8mm 1mm;
-  white-space: nowrap;
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.375rem;
   pointer-events: none;
+}
+
+/* In the flow on screen, so it cannot land on top of the proof stamp the way
+   an absolutely positioned link did once the card got narrow. */
+.qr-open {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: underline;
 }
 
 @page {
   size: A4;
   margin: 8mm;
 }
+
+/* ---- Print: the sticker, unchanged ---- */
 
 @media print {
   .qr-no-print {
@@ -91,7 +127,63 @@
   body {
     background: #fff !important;
   }
+
   .qr-sheet {
+    --card-w: 95mm;
+    --card-h: 54mm;
+    grid-template-columns: repeat(2, var(--card-w));
     gap: 2mm;
+    justify-content: center;
+  }
+
+  .qr-card {
+    width: var(--card-w);
+    height: var(--card-h);
+    grid-template-columns: auto 1fr;
+    gap: 4mm;
+    padding: 4mm;
+    border: 0.3mm solid #000;
+    border-radius: 2mm;
+    /* Never split a card across a page. */
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .qr-card svg {
+    width: 40mm;
+    height: 40mm;
+  }
+
+  .qr-unit {
+    font-size: 15pt;
+  }
+  .qr-lead {
+    font-size: 12pt;
+    margin-top: 1mm;
+  }
+  .qr-en {
+    font-size: 9pt;
+    line-height: 1.3;
+  }
+  .qr-house {
+    margin-top: 1.5mm;
+  }
+
+  .qr-proof {
+    outline: 1mm solid #b91c1c;
+    outline-offset: -1mm;
+  }
+  .qr-proof-stamp {
+    position: absolute;
+    /* Clears the 40mm code plus its 4mm padding and 4mm gutter. */
+    inset-inline-start: 48mm;
+    inset-inline-end: 2mm;
+    inset-block-end: 1.5mm;
+    margin-top: 0;
+    text-align: center;
+    font-size: 7pt;
+    border-radius: 1mm;
+    padding: 0.8mm 1mm;
+    white-space: nowrap;
   }
 }

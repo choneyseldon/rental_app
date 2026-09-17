@@ -1,10 +1,18 @@
 import { notFound } from "next/navigation";
-import { TenantCards, type TenantData } from "../u/[token]/TenantView";
+import { AppShell, type NavItem } from "@/components/AppShell";
+import { IconBolt, IconCash, IconDrop, IconHome, IconPin } from "@/components/icons";
+import { HomeCards } from "../u/[token]/HomeView";
+import { RentCards } from "../u/[token]/rent/RentView";
+import { WaterCards } from "../u/[token]/water/WaterView";
+import { PowerCards } from "../u/[token]/power/PowerView";
+import { LocationCards } from "../u/[token]/location/LocationView";
+import type { TenantData } from "../u/[token]/shared";
 
 /**
- * Layout proofing for the tenant page without a Convex deployment. The fixture
+ * Layout proofing for the tenant pages without a Convex deployment. The fixture
  * is typed as the query's own return type, so it cannot drift from the real
- * contract. Not reachable in production.
+ * contract. All five pages are stacked on one route because what is being
+ * proofed is the layout, not the routing. Not reachable in production.
  */
 const fixture: TenantData = {
   unitNumber: "2B",
@@ -15,7 +23,7 @@ const fixture: TenantData = {
   rent: { amount: 8500, status: "none" },
   water: {
     published: true,
-    amount: 412,
+    amount: 315.05,
     billImageUrl: "https://example.invalid/bill.jpg",
     status: "pending",
   },
@@ -26,6 +34,14 @@ const fixture: TenantData = {
   ],
 };
 
+const nav: NavItem[] = [
+  { href: "/preview-tmp", label: "Home", icon: <IconHome /> },
+  { href: "/preview-tmp#rent", label: "Rent", icon: <IconCash /> },
+  { href: "/preview-tmp#water", label: "Water", icon: <IconDrop /> },
+  { href: "/preview-tmp#power", label: "Power", icon: <IconBolt /> },
+  { href: "/preview-tmp#location", label: "Location", icon: <IconPin /> },
+];
+
 /**
  * Evaluated per request. Without this the route is prerendered, the env gate
  * is read at build time, and the 404 is baked into static output where no
@@ -33,7 +49,35 @@ const fixture: TenantData = {
  */
 export const dynamic = "force-dynamic";
 
+function Divider({ id, label }: { id: string; label: string }) {
+  return (
+    <h2
+      id={id}
+      className="mt-10 border-t border-line pt-6 text-xs font-bold uppercase tracking-widest text-muted"
+    >
+      {label}
+    </h2>
+  );
+}
+
 export default function PreviewPage() {
   if (process.env.ENABLE_PREVIEW !== "1") notFound();
-  return <TenantCards data={fixture} token="preview-token" />;
+  return (
+    <AppShell
+      nav={nav}
+      user={fixture.tenantName}
+      greeting={`Kuzuzangpo, ${fixture.tenantName} 👋`}
+      subtitle="Your rental account for September 2026."
+    >
+      <HomeCards data={fixture} />
+      <Divider id="rent" label="Rent page" />
+      <div className="mt-5"><RentCards data={fixture} /></div>
+      <Divider id="water" label="Water page" />
+      <div className="mt-5"><WaterCards data={fixture} /></div>
+      <Divider id="power" label="Power page" />
+      <div className="mt-5"><PowerCards data={fixture} /></div>
+      <Divider id="location" label="Location page" />
+      <div className="mt-5"><LocationCards data={fixture} /></div>
+    </AppShell>
+  );
 }

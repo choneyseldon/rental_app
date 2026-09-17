@@ -15,10 +15,13 @@ export type NavItem = {
   primary?: boolean;
 };
 
+/**
+ * Exact, not prefix. Every nav destination in this app is a leaf, and the
+ * tenant's Home sits at the parent of its four siblings — a prefix match would
+ * light Home up on all of them.
+ */
 function isActive(pathname: string, href: string) {
-  return href === "/admin" || href.split("/").length <= 2
-    ? pathname === href
-    : pathname.startsWith(href);
+  return pathname === href;
 }
 
 /**
@@ -53,15 +56,12 @@ export function AppShell({
   const tabs = needsMore ? barItems.slice(0, 4) : barItems;
   const overflow = needsMore ? barItems.slice(4) : [];
 
-  // The tenant nav scrolls to sections on one page rather than routing, so the
-  // first entry stands in for "you are here".
-  const activeFor = (href: string) =>
-    href.startsWith("#") ? href === nav[0]?.href : isActive(pathname, href);
+  const activeFor = (href: string) => isActive(pathname, href);
 
   return (
     <div className="min-h-screen lg:flex">
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-brand-tint px-4 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:overflow-y-auto">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-brand-tint px-4 py-6 print:!hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:overflow-y-auto">
         <div className="px-2">
           <Brand tagline={tagline} />
         </div>
@@ -99,7 +99,7 @@ export function AppShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-line bg-white/90 px-4 py-3 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-line bg-white/90 px-4 py-3 backdrop-blur print:hidden sm:px-6">
           <div className="lg:hidden">
             <Brand />
           </div>
@@ -114,9 +114,9 @@ export function AppShell({
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-5 pb-24 sm:px-6 lg:px-8 lg:pb-8">
-          <div className="mx-auto w-full max-w-6xl">
-            <div className="mb-5">
+        <main className="flex-1 px-4 py-5 pb-24 print:p-0 sm:px-6 lg:px-8 lg:pb-8">
+          <div className="mx-auto w-full max-w-6xl print:max-w-none">
+            <div className="mb-5 print:hidden">
               <h1 className="text-2xl font-bold tracking-tight sm:text-[28px]">{greeting}</h1>
               <p className="mt-1 text-sm text-muted sm:text-base">{subtitle}</p>
             </div>
@@ -151,7 +151,7 @@ export function AppShell({
       ) : null}
 
       {/* Mobile bottom tabs */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-line bg-white lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-line bg-white print:hidden lg:hidden">
         {tabs.map((item) => {
           const active = activeFor(item.href);
           return (
