@@ -39,6 +39,25 @@ export const listUnits = query({
   },
 });
 
+/**
+ * Debug helper: return all units and which are marked occupied.
+ * Call with the admin secret to inspect `isOccupied` and `isOwner` flags.
+ */
+export const debugOccupiedUnits = query({
+  args: secretArg,
+  handler: async (ctx, { secret }) => {
+    assertAdmin(ctx, secret);
+    const units = await ctx.db.query("units").collect();
+    const occupied = units.filter((u) => u.isOccupied).sort((a, b) => compareUnits(a.unitNumber, b.unitNumber));
+    return {
+      totalUnits: units.length,
+      occupiedCount: occupied.length,
+      units: units.map((u) => ({ _id: u._id, unitNumber: u.unitNumber, isOccupied: u.isOccupied, isOwner: u.isOwner === true })),
+      occupiedUnits: occupied.map((u) => ({ _id: u._id, unitNumber: u.unitNumber, isOwner: u.isOwner === true })),
+    };
+  },
+});
+
 /** Updates the editable details of one unit. Never touches the token. */
 export const updateUnit = mutation({
   args: {
