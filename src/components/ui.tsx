@@ -155,10 +155,14 @@ export function Brand({ tagline }: { tagline?: string }) {
     <div className="flex items-center gap-2.5">
       <ChimBillMark className="size-10 shrink-0" />
       <span>
-        {/* The artwork carries the name too, but only legibly when it is large.
-            At this size the name is set in the UI font instead. */}
-        <span className="block text-lg font-bold leading-none tracking-tight">
-          Chim<span className="text-brand">Bill</span>
+        {/* Tibetan script sits on a smaller em-box than Latin, so ཁྱིམ་ set at
+            the same nominal size reads noticeably smaller than Bill beside it.
+            The larger size is what makes the two halves match. */}
+        <span className="flex items-baseline text-lg font-bold tracking-tight">
+          {/* The vowel signs stack above the consonant, so the line box has to
+              be taller than the Latin half or the glyph spills out of it. */}
+          <span className="font-tibetan text-[1.45em] leading-[1.35]">ཁྱིམ་</span>
+          <span className="leading-[1.35] text-brand">Bill</span>
         </span>
         {tagline ? <span className="block text-[11px] leading-tight text-muted">{tagline}</span> : null}
       </span>
