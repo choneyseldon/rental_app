@@ -24,6 +24,7 @@ const bill: WaterBill = {
   billImageUrl: "https://example.invalid/thromde.jpg",
   published: false,
   occupiedCount: 8,
+  publishedCount: null,
   shares,
 };
 

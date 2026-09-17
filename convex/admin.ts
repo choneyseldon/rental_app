@@ -276,6 +276,11 @@ export const getWaterBill = query({
         : null,
       published,
       occupiedCount: occupied.length,
+      // How many units the published split was actually written across. A
+      // published month shows its frozen shares, so if a unit has been added
+      // or vacated since, this is the number the tenants are seeing and it
+      // will not match occupiedCount until the month is re-published.
+      publishedCount: published ? shares.length : null,
       shares,
     };
   },

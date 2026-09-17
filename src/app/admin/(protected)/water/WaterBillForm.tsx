@@ -11,6 +11,7 @@ export type WaterBill = {
   billImageUrl: string | null;
   published: boolean;
   occupiedCount: number;
+  publishedCount: number | null;
   shares: { unitNumber: string; tenantName: string; amount: number; isOwner: boolean }[];
 };
 
@@ -45,6 +46,10 @@ export function WaterBillForm({ bill }: { bill: WaterBill }) {
   }
 
   const sharesTotal = bill.shares.reduce((a, s) => a + s.amount, 0);
+  const stale =
+    bill.published &&
+    bill.publishedCount !== null &&
+    bill.publishedCount !== bill.occupiedCount;
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
@@ -107,9 +112,20 @@ export function WaterBillForm({ bill }: { bill: WaterBill }) {
           <div className="p-5 pb-3">
             <h3 className="text-lg font-bold">{bill.published ? "The split" : "How it would split"}</h3>
             <p className="text-sm text-muted">
-              Split equally across the {bill.occupiedCount} unit{bill.occupiedCount === 1 ? "" : "s"} marked occupied,
-              the owners&rsquo; own flat included.
+              {bill.published
+                ? `Published across ${bill.publishedCount} unit${bill.publishedCount === 1 ? "" : "s"}. This is what tenants see.`
+                : `Split equally across the ${bill.occupiedCount} unit${bill.occupiedCount === 1 ? "" : "s"} marked occupied, the owners' own flat included.`}
             </p>
+            {/* A published split is frozen, so adding or vacating a unit
+                afterwards changes nothing until the month is re-published.
+                Silence here is what makes that look like a bug. */}
+            {stale ? (
+              <p className="mt-3 rounded-xl bg-warn-soft p-3 text-sm text-[#92400e]">
+                {bill.occupiedCount} unit{bill.occupiedCount === 1 ? " is" : "s are"} marked occupied
+                now, but this month was published across {bill.publishedCount}. Re-publish below to
+                split it {bill.occupiedCount} ways.
+              </p>
+            ) : null}
           </div>
 
           {bill.shares.length === 0 ? (

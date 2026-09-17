@@ -172,17 +172,19 @@ export function Brand({ tagline }: { tagline?: string }) {
  * artwork by dropping it at public/logo.png and using it here instead.
  */
 /**
- * The logo artwork itself, from public/. It is square and already carries the
- * wordmark, so it is only ever shown as the mark; the readable name beside it
- * is set in the UI font so it stays legible at the 40px this renders at.
+ * The mark, cut from the logo artwork in public/chimbill_logo.png. The artwork
+ * is a lockup: the house sits above a wordmark, on white. At the 40px this
+ * renders at, that wordmark comes out a few pixels tall and unreadable, so the
+ * mark is cropped out of it and the name beside it is set in the UI font. The
+ * crop is transparent, so it sits on the tinted sidebar as well as on white.
  */
 export function ChimBillMark({ className = "size-10" }: { className?: string }) {
   return (
     <Image
-      src="/chimbill_logo.png"
+      src="/chimbill-mark.png"
       alt="ChimBill"
-      width={256}
-      height={256}
+      width={639}
+      height={639}
       priority
       className={`${className} object-contain`}
     />
