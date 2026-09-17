@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { IconChevron } from "./icons";
 
@@ -154,6 +155,8 @@ export function Brand({ tagline }: { tagline?: string }) {
     <div className="flex items-center gap-2.5">
       <ChimBillMark className="size-10 shrink-0" />
       <span>
+        {/* The artwork carries the name too, but only legibly when it is large.
+            At this size the name is set in the UI font instead. */}
         <span className="block text-lg font-bold leading-none tracking-tight">
           Chim<span className="text-brand">Bill</span>
         </span>
@@ -168,67 +171,20 @@ export function Brand({ tagline }: { tagline?: string }) {
  * size and on a printed card and needs no image request. Swap in the supplied
  * artwork by dropping it at public/logo.png and using it here instead.
  */
+/**
+ * The logo artwork itself, from public/. It is square and already carries the
+ * wordmark, so it is only ever shown as the mark; the readable name beside it
+ * is set in the UI font so it stays legible at the 40px this renders at.
+ */
 export function ChimBillMark({ className = "size-10" }: { className?: string }) {
-  // Brand artwork, so the colours are fixed rather than themed: the navy and
-  // the green are the logo's own, not the UI palette's.
-  const navy = "#17334f";
-  const green = "#00a06d";
   return (
-    <svg viewBox="0 0 96 96" className={className} role="img" aria-label="ChimBill">
-      {/* Roof */}
-      <path
-        d="M10 41 48 11l38 30"
-        fill="none"
-        stroke={navy}
-        strokeWidth="10"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Ground */}
-      <rect x="9" y="82" width="78" height="7" rx="3.5" fill={navy} />
-
-      {/* Green wall with two windows */}
-      <rect x="22" y="36" width="21" height="46" fill={green} />
-      <rect x="28" y="44" width="9" height="11" rx="1" fill="#fff" />
-      <rect x="28" y="61" width="9" height="11" rx="1" fill="#fff" />
-
-      {/* Door */}
-      <rect x="45" y="57" width="13" height="25" rx="1.5" fill={navy} />
-      <circle cx="54.5" cy="70" r="1.9" fill="#fff" />
-
-      {/* The bill, drawn over the house with a folded corner */}
-      <path
-        d="M56 24h16l15 15v37a6 6 0 0 1-6 6H56a6 6 0 0 1-6-6V30a6 6 0 0 1 6-6Z"
-        fill="#fff"
-        stroke={navy}
-        strokeWidth="7"
-        strokeLinejoin="round"
-      />
-      {/* Lightning */}
-      <path d="M71 32 63 44h5l-2 7 9-12h-5l2-7Z" fill={green} />
-      {/* QR, corner brackets around a few modules */}
-      <g stroke={green} strokeWidth="2.6" fill="none" strokeLinecap="round">
-        <path d="M58 56v-3h4M76 53h4v3M80 64v3h-4M62 67h-4v-3" />
-      </g>
-      <g fill={green}>
-        <rect x="62" y="56" width="5" height="5" rx="1" />
-        <rect x="71" y="56" width="5" height="5" rx="1" />
-        <rect x="62" y="63" width="5" height="5" rx="1" />
-        <rect x="71" y="63" width="2.6" height="2.6" rx="0.7" />
-        <rect x="75" y="65.4" width="2.6" height="2.6" rx="0.7" />
-      </g>
-      {/* Amount lines */}
-      <rect x="57" y="71" width="15" height="3.2" rx="1.6" fill="#9fb3c6" />
-      <rect x="57" y="77" width="10" height="3.2" rx="1.6" fill="#9fb3c6" />
-      {/* The money badge */}
-      <circle cx="78.5" cy="75" r="7" fill={green} />
-      <path
-        d="M78.5 70.5v9M80.9 72.3a2.6 2.6 0 0 0-2.4-1.3c-1.5 0-2.4.8-2.4 1.8s.9 1.6 2.4 1.9 2.5.8 2.5 1.9-1 1.8-2.5 1.8a2.8 2.8 0 0 1-2.5-1.4"
-        fill="none"
-        stroke="#fff"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
+    <Image
+      src="/chimbill_logo.png"
+      alt="ChimBill"
+      width={256}
+      height={256}
+      priority
+      className={`${className} object-contain`}
+    />
   );
 }
