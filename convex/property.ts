@@ -21,9 +21,25 @@ export const RENT_ACCOUNT = {
   number: "200570303",
 } as const;
 
-/** The ten doors, in the order they should always appear. Note 5 is skipped. */
+/** The ten let doors, in the order they should always appear. */
 export const UNIT_NUMBERS = [
   "1A", "1B", "2A", "2B", "3A", "3B", "4A", "4B", "6A", "6B",
+] as const;
+
+/**
+ * The owner's own flat, the whole fifth floor.
+ *
+ * It is a unit so that it counts in the water split — the owner uses water
+ * like anyone else, and leaving them out would quietly overcharge every
+ * tenant. It is flagged so it stays out of rent and review: the owner does not
+ * pay themselves, and has no screenshot to submit.
+ */
+export const OWNER_UNIT = "5";
+
+/** Who a tenant should call. Both are WhatsApp numbers. */
+export const OWNER_CONTACTS = [
+  { name: "Mrs. Norbu Dolma", phone: "+97517332753" },
+  { name: "Mr. Tashi Phuntsho", phone: "+97517679994" },
 ] as const;
 
 /**

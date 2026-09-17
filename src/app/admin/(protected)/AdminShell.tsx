@@ -18,7 +18,7 @@ import { logOut } from "../actions";
 const COPY: Record<string, { title: string; subtitle: string }> = {
   "/admin": { title: "Overview", subtitle: "Here's what's happening with your rentals today." },
   "/admin/units": { title: "Units", subtitle: "Tenant details, rent and door codes." },
-  "/admin/review": { title: "Review", subtitle: "Payment screenshots waiting on you." },
+  "/admin/review": { title: "Review", subtitle: "Rent and water screenshots waiting on you." },
   "/admin/water": { title: "Water", subtitle: "Upload the Thromde bill and split it." },
   "/admin/qr": { title: "Print QR", subtitle: "One card per door, ten to a page." },
   "/admin/house": { title: "House details", subtitle: "The building, its doors and how tenants reach it." },

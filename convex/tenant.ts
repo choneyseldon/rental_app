@@ -120,6 +120,7 @@ export const getByToken = query({
 
     return {
       unitNumber: unit.unitNumber,
+      isOwner: unit.isOwner === true,
       tenantName: unit.tenantName,
       bpcConsumerNumber: unit.bpcConsumerNumber,
       month,

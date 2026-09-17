@@ -17,6 +17,7 @@ const rows: PendingRow[] = [
     claimedAmount: 8500,
     expectedAmount: 8500,
     imageUrl: SLIP,
+    referenceUrl: null,
     submittedAt: 1,
   },
   {
@@ -28,6 +29,7 @@ const rows: PendingRow[] = [
     claimedAmount: 8000,
     expectedAmount: 8500,
     imageUrl: SLIP,
+    referenceUrl: null,
     submittedAt: 2,
   },
   {
@@ -37,8 +39,9 @@ const rows: PendingRow[] = [
     month: "2026-09",
     type: "water",
     claimedAmount: 412,
-    expectedAmount: null,
-    imageUrl: null,
+    expectedAmount: 400,
+    imageUrl: SLIP,
+    referenceUrl: SLIP,
     submittedAt: 3,
   },
 ];

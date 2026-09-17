@@ -4,13 +4,14 @@ import { useQuery } from "convex/react";
 import { useState } from "react";
 import { api } from "../../../../convex/_generated/api";
 import { PaymentUpload } from "./PaymentUpload";
-import { PROPERTY, RENT_ACCOUNT } from "../../../../convex/property";
+import { OWNER_CONTACTS, PROPERTY, RENT_ACCOUNT } from "../../../../convex/property";
 import { AppShell, type NavItem } from "@/components/AppShell";
 import { Card, IconTile, Pill, buttonStyles, money, type Tone } from "@/components/ui";
 import {
   IconBolt, IconCamera, IconCash, IconCheck, IconChevron, IconCopy,
-  IconDoc, IconDrop, IconHome, IconPin, IconReceipt,
+  IconDoc, IconDrop, IconHome, IconPin, IconReceipt, IconSend,
 } from "@/components/icons";
+import { whatsAppLink } from "@/lib/phone";
 
 type Status = "approved" | "pending" | "rejected" | "none";
 
@@ -119,17 +120,23 @@ export function TenantCards({
   /** Omitted in layout previews, where uploading is not wired up. */
   token?: string;
 }) {
+  // The owners' own flat has nothing to pay, so the tab that jumps to the
+  // upload card would land on a section that is never rendered.
   const nav: NavItem[] = [
     { href: "#home", label: "Home", icon: <IconHome /> },
-    { href: "#pay", label: "Pay", icon: <IconCash /> },
+    ...(data.isOwner ? [] : [{ href: "#pay", label: "Pay", icon: <IconCash /> }]),
     { href: "#payments", label: "Payments", icon: <IconReceipt /> },
     { href: "#electricity", label: "Power", icon: <IconBolt /> },
     { href: "#house", label: "House", icon: <IconPin /> },
   ];
 
-  const dueRent = data.rent.status !== "approved" && data.rent.status !== "pending";
+  const dueRent =
+    !data.isOwner && data.rent.status !== "approved" && data.rent.status !== "pending";
   const dueWater =
-    data.water.published && data.water.status !== "approved" && data.water.status !== "pending";
+    !data.isOwner &&
+    data.water.published &&
+    data.water.status !== "approved" &&
+    data.water.status !== "pending";
 
   return (
     <AppShell
@@ -144,21 +151,23 @@ export function TenantCards({
           <Stat icon={<IconHome />} label="My Unit" value={data.unitNumber} meta="Your door" />
           <Stat
             icon={<IconCash />}
-            label="Current Rent"
-            value={money(data.rent.amount)}
-            meta={<StatusPill status={data.rent.status} />}
-            tone={data.rent.status === "approved" ? "ok" : "brand"}
+            label={data.isOwner ? "Rent" : "Current Rent"}
+            value={data.isOwner ? "—" : money(data.rent.amount)}
+            meta={
+              data.isOwner ? "Owner's flat" : <StatusPill status={data.rent.status} />
+            }
+            tone={data.rent.status === "approved" && !data.isOwner ? "ok" : "brand"}
           />
           <Stat
             icon={<IconDrop />}
             label="Water Bill"
             value={data.water.published && data.water.amount !== null ? money(data.water.amount) : "—"}
             meta={
-              data.water.published ? (
-                <StatusPill status={data.water.status} />
-              ) : (
-                "Not published yet"
-              )
+              !data.water.published
+                ? "Not published yet"
+                : data.isOwner
+                  ? "Your share of the bill"
+                  : <StatusPill status={data.water.status} />
             }
           />
           <Stat
@@ -339,9 +348,37 @@ export function TenantCards({
                 </div>
               </div>
 
+              <div className="mt-5 border-t border-line pt-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                  Contact the owners
+                </p>
+                <ul className="mt-2 space-y-3">
+                  {OWNER_CONTACTS.map((c) => {
+                    const chat = whatsAppLink(c.phone, `Kuzuzangpo, about unit ${data.unitNumber}.`);
+                    return (
+                      <li key={c.phone} className="flex flex-wrap items-center gap-3">
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-semibold">{c.name}</span>
+                          <a href={`tel:${c.phone}`} className="block text-sm text-muted underline">
+                            {c.phone}
+                          </a>
+                        </span>
+                        {chat ? (
+                          <a href={chat} target="_blank" rel="noopener noreferrer"
+                            className={`${buttonStyles.ghost} shrink-0 !min-h-10 !px-3 !text-brand`}>
+                            <IconSend className="h-4 w-4" />
+                            Message
+                          </a>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+
               <p className="mt-5 border-t border-line pt-5 text-sm text-muted">
-                Need help? Ask {PROPERTY.owner} directly. There is no account to recover and no
-                password to reset — the code on your door is all you need.
+                There is no account to recover and no password to reset — the code on your door is
+                all you need.
               </p>
             </Card>
           </div>

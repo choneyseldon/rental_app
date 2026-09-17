@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { Avatar, Card, Pill, buttonStyles, money } from "@/components/ui";
-import { IconAlert, IconCheck, IconSend } from "@/components/icons";
+import { IconAlert, IconCheck, IconHome, IconSend } from "@/components/icons";
 import { whatsAppLink } from "@/lib/phone";
 import { rotateToken, saveUnit } from "../../actions";
 
@@ -14,6 +14,7 @@ export type UnitRow = {
   rentAmount: number;
   bpcConsumerNumber: string;
   isOccupied: boolean;
+  isOwner: boolean;
 };
 
 const field =
@@ -39,18 +40,22 @@ function UnitCard({ unit }: { unit: UnitRow }) {
         <div className="min-w-0 flex-1">
           <h2 className="text-lg font-bold leading-tight">Unit {unit.unitNumber}</h2>
           <p className="truncate text-sm text-muted">
-            {unit.tenantName || "No tenant recorded"}
-            {unit.rentAmount > 0 ? ` · ${money(unit.rentAmount)}` : ""}
+            {unit.isOwner
+              ? "Owners' own flat"
+              : unit.tenantName || "No tenant recorded"}
+            {!unit.isOwner && unit.rentAmount > 0 ? ` · ${money(unit.rentAmount)}` : ""}
           </p>
         </div>
-        {unit.isOccupied ? (
+        {unit.isOwner ? (
+          <Pill tone="neutral"><IconHome className="h-3.5 w-3.5" />Owner</Pill>
+        ) : unit.isOccupied ? (
           <Pill tone="ok"><IconCheck className="h-3.5 w-3.5" />Occupied</Pill>
         ) : (
           <Pill tone="neutral">Vacant</Pill>
         )}
       </div>
 
-      {chat ? (
+      {chat && !unit.isOwner ? (
         <div className="border-b border-line px-4 py-3 sm:px-5">
           <a href={chat} target="_blank" rel="noopener noreferrer"
             className={`${buttonStyles.ghost} w-full !text-brand`}>
@@ -63,11 +68,28 @@ function UnitCard({ unit }: { unit: UnitRow }) {
       <form action={save} className="p-4 sm:p-5">
         <input type="hidden" name="unitId" value={unit._id} />
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        {unit.isOwner ? (
+          <>
+            {/* Preserved as-is: the mutation rewrites every field it is given,
+                so the ones this card hides still have to be sent. */}
+            <input type="hidden" name="tenantName" value={unit.tenantName} />
+            <input type="hidden" name="tenantPhone" value={unit.tenantPhone} />
+            <input type="hidden" name="rentAmount" value={unit.rentAmount} />
+            <p className="rounded-xl bg-brand-tint p-3 text-sm leading-relaxed">
+              This flat pays no rent and uploads no proof, so it never reaches Rent review or
+              Water review. It still counts as one share of the water bill.
+            </p>
+          </>
+        ) : null}
+
+        <div className={`grid gap-4 sm:grid-cols-2 ${unit.isOwner ? "mt-4" : ""}`}>
+          {unit.isOwner ? null : (
           <div className="sm:col-span-2">
             <label className={label} htmlFor={`name-${unit._id}`}>Tenant name</label>
             <input id={`name-${unit._id}`} name="tenantName" defaultValue={unit.tenantName} className={field} />
           </div>
+          )}
+          {unit.isOwner ? null : (
           <div>
             <label className={label} htmlFor={`phone-${unit._id}`}>Phone (WhatsApp)</label>
             <input id={`phone-${unit._id}`} name="tenantPhone" type="tel" inputMode="tel"
@@ -80,11 +102,14 @@ function UnitCard({ unit }: { unit: UnitRow }) {
               </p>
             ) : null}
           </div>
+          )}
+          {unit.isOwner ? null : (
           <div>
             <label className={label} htmlFor={`rent-${unit._id}`}>Rent (Nu.)</label>
             <input id={`rent-${unit._id}`} name="rentAmount" type="number" inputMode="numeric"
               min={0} step={1} defaultValue={unit.rentAmount} className={`${field} tabular-nums`} />
           </div>
+          )}
           <div className="sm:col-span-2">
             <label className={label} htmlFor={`bpc-${unit._id}`}>BPC consumer number</label>
             <input id={`bpc-${unit._id}`} name="bpcConsumerNumber" inputMode="numeric"
@@ -92,10 +117,14 @@ function UnitCard({ unit }: { unit: UnitRow }) {
           </div>
         </div>
 
-        <label className="mt-4 flex min-h-11 items-center gap-3 rounded-xl bg-brand-tint px-3 text-sm font-semibold">
-          <input type="checkbox" name="isOccupied" defaultChecked={unit.isOccupied} className="size-5 accent-[#2563eb]" />
-          Occupied — include in the water split
-        </label>
+        {unit.isOwner ? (
+          <input type="hidden" name="isOccupied" value="on" />
+        ) : (
+          <label className="mt-4 flex min-h-11 items-center gap-3 rounded-xl bg-brand-tint px-3 text-sm font-semibold">
+            <input type="checkbox" name="isOccupied" defaultChecked={unit.isOccupied} className="size-5 accent-[#2563eb]" />
+            Occupied — include in the water split
+          </label>
+        )}
 
         {saveState?.error ? (
           <p role="alert" className="mt-3 text-sm font-medium text-bad">{saveState.error}</p>
@@ -106,6 +135,7 @@ function UnitCard({ unit }: { unit: UnitRow }) {
         </button>
       </form>
 
+      {unit.isOwner ? null : (
       <form
         action={rotate}
         className="border-t border-line px-4 py-3 sm:px-5"
@@ -124,6 +154,7 @@ function UnitCard({ unit }: { unit: UnitRow }) {
           {rotating ? "Rotating…" : "New door code (tenant moved out)"}
         </button>
       </form>
+      )}
     </Card>
   );
 }

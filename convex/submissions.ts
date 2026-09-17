@@ -15,6 +15,9 @@ async function unitFromToken(
     .withIndex("by_token", (q) => q.eq("token", token))
     .unique();
   if (!unit) throw new Error("Unknown code. Ask the owner for a new one.");
+  if (unit.isOwner) {
+    throw new Error("The owner's flat does not submit payment proof.");
+  }
   return unit;
 }
 

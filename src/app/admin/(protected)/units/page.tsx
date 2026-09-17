@@ -18,6 +18,7 @@ export default async function AdminUnitsPage() {
       rentAmount: u.rentAmount,
       bpcConsumerNumber: u.bpcConsumerNumber,
       isOccupied: u.isOccupied,
+      isOwner: u.isOwner === true,
     }));
   } catch {
     return (

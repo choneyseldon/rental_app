@@ -47,7 +47,10 @@ export default async function QrSheetPage() {
 
   let units: { _id: string; unitNumber: string; token: string }[];
   try {
-    units = await client.query(api.admin.listUnits, { secret });
+    const rows = await client.query(api.admin.listUnits, { secret });
+    // No sticker on the owners' own door: that flat never pays rent and never
+    // uploads proof, so a card for it would only be printed and thrown away.
+    units = rows.filter((u) => u.isOwner !== true);
   } catch {
     return (
       <p role="alert" className="card border-bad/30 bg-bad-soft p-4 text-sm text-[#991b1b]">

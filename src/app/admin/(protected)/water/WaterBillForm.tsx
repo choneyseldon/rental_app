@@ -11,7 +11,7 @@ export type WaterBill = {
   billImageUrl: string | null;
   published: boolean;
   occupiedCount: number;
-  shares: { unitNumber: string; tenantName: string; amount: number }[];
+  shares: { unitNumber: string; tenantName: string; amount: number; isOwner: boolean }[];
 };
 
 const money2 = (n: number) =>
@@ -107,7 +107,8 @@ export function WaterBillForm({ bill }: { bill: WaterBill }) {
           <div className="p-5 pb-3">
             <h3 className="text-lg font-bold">{bill.published ? "The split" : "How it would split"}</h3>
             <p className="text-sm text-muted">
-              Split equally across the {bill.occupiedCount} unit{bill.occupiedCount === 1 ? "" : "s"} marked occupied.
+              Split equally across the {bill.occupiedCount} unit{bill.occupiedCount === 1 ? "" : "s"} marked occupied,
+              the owners&rsquo; own flat included.
             </p>
           </div>
 
@@ -123,7 +124,11 @@ export function WaterBillForm({ bill }: { bill: WaterBill }) {
                   <li key={s.unitNumber} className="flex items-center justify-between gap-3 px-5 py-3">
                     <span className="min-w-0 truncate">
                       <span className="font-semibold">Unit {s.unitNumber}</span>
-                      {s.tenantName ? <span className="text-muted"> · {s.tenantName}</span> : null}
+                      {s.isOwner ? (
+                        <span className="text-muted"> · Owners&rsquo; flat</span>
+                      ) : s.tenantName ? (
+                        <span className="text-muted"> · {s.tenantName}</span>
+                      ) : null}
                     </span>
                     <span className="shrink-0 font-semibold tabular-nums">{money2(s.amount)}</span>
                   </li>

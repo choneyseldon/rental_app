@@ -105,6 +105,23 @@ export const listPending = query({
       pending.map(async (s) => {
         const unit = await ctx.db.get(s.unitId);
         const period = await ctx.db.get(s.periodId);
+
+        // Water is checked against the share frozen when the bill was
+        // published, not against a recomputed split — occupancy may have
+        // changed since, and the tenant paid what they were shown.
+        let expectedAmount: number | null = null;
+        if (s.type === "rent") {
+          expectedAmount = unit?.rentAmount ?? null;
+        } else {
+          const share = await ctx.db
+            .query("waterShares")
+            .withIndex("by_unit_and_period", (q) =>
+              q.eq("unitId", s.unitId).eq("periodId", s.periodId),
+            )
+            .unique();
+          expectedAmount = share?.amount ?? null;
+        }
+
         return {
           submissionId: s._id,
           unitNumber: unit?.unitNumber ?? "?",
@@ -112,9 +129,14 @@ export const listPending = query({
           month: period?.month ?? "",
           type: s.type,
           claimedAmount: s.claimedAmount,
-          expectedAmount:
-            s.type === "rent" ? (unit?.rentAmount ?? null) : null,
+          expectedAmount,
           imageUrl: await ctx.storage.getUrl(s.image),
+          // The Thromde bill itself, so a water screenshot can be checked
+          // against the paper it came from without leaving the queue.
+          referenceUrl:
+            s.type === "water" && period?.waterBillImage
+              ? await ctx.storage.getUrl(period.waterBillImage)
+              : null,
           submittedAt: s._creationTime,
         };
       }),
@@ -215,7 +237,12 @@ export const getWaterBill = query({
 
     const published = period?.isPublished === true;
 
-    let shares: { unitNumber: string; tenantName: string; amount: number }[];
+    let shares: {
+      unitNumber: string;
+      tenantName: string;
+      amount: number;
+      isOwner: boolean;
+    }[];
     if (published && period) {
       const stored = await ctx.db
         .query("waterShares")
@@ -227,6 +254,7 @@ export const getWaterBill = query({
           unitNumber: unit?.unitNumber ?? "?",
           tenantName: unit?.tenantName ?? "",
           amount: s.amount,
+          isOwner: unit?.isOwner === true,
         };
       });
       shares.sort((a, b) => compareUnits(a.unitNumber, b.unitNumber));
@@ -236,6 +264,7 @@ export const getWaterBill = query({
         unitNumber: u.unitNumber,
         tenantName: u.tenantName,
         amount: amounts[i],
+        isOwner: u.isOwner === true,
       }));
     }
 
@@ -359,7 +388,7 @@ export const dashboard = query({
 
     const month = currentMonthKey();
     const units = (await ctx.db.query("units").collect())
-      .filter((u) => u.isOccupied)
+      .filter((u) => u.isOccupied && !u.isOwner)
       .sort((a, b) => compareUnits(a.unitNumber, b.unitNumber));
 
     const periods = await ctx.db.query("periods").collect();

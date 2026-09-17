@@ -13,6 +13,12 @@ export default defineSchema({
     rentAmount: v.number(),
     bpcConsumerNumber: v.string(),
     isOccupied: v.boolean(),
+    /**
+     * The owner's own flat. Counts in the water split, but never appears in
+     * rent or review and cannot submit payment proof. Optional because the
+     * units seeded before this existed have no such field.
+     */
+    isOwner: v.optional(v.boolean()),
   }).index("by_token", ["token"]),
 
   // One row per month. `month` is "YYYY-MM" so it sorts lexicographically.

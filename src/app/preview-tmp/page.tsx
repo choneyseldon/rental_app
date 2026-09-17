@@ -8,6 +8,7 @@ import { TenantCards, type TenantData } from "../u/[token]/TenantView";
  */
 const fixture: TenantData = {
   unitNumber: "2B",
+  isOwner: false,
   tenantName: "Pema Wangmo",
   bpcConsumerNumber: "1043872210",
   month: "2026-09",

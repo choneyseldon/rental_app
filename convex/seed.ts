@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { internalMutation } from "./_generated/server";
-import { UNIT_NUMBERS } from "./property";
+import { OWNER_UNIT, UNIT_NUMBERS } from "./property";
 
 /**
  * Creates the property's units with random tokens.
@@ -32,6 +32,22 @@ export const seedUnits = internalMutation({
         isOccupied: false,
       });
       created.push(unitNumber);
+    }
+
+    // The owner's flat: occupied from the start, so it is in the water split
+    // the first time a bill is published.
+    if (!have.has(OWNER_UNIT)) {
+      await ctx.db.insert("units", {
+        unitNumber: OWNER_UNIT,
+        token: nanoid(21),
+        tenantName: "Owner",
+        tenantPhone: "",
+        rentAmount: 0,
+        bpcConsumerNumber: "",
+        isOccupied: true,
+        isOwner: true,
+      });
+      created.push(OWNER_UNIT);
     }
 
     return {
