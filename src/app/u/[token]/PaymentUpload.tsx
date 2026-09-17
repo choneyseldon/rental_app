@@ -209,9 +209,12 @@ export function PaymentUpload({
           <input
             id={`amount-${type}`}
             type="number"
-            inputMode="numeric"
-            min={1}
-            step={1}
+            // A water share is a split of the bill and carries chhertum, so a
+            // whole-ngultrum step rejects the amount this field is pre-filled
+            // with and the tenant cannot send anything at all.
+            inputMode="decimal"
+            min={0.01}
+            step={0.01}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             className="mt-1 min-h-12 w-full rounded-xl border border-line bg-white px-3 text-lg tabular-nums outline-none focus:border-brand"
