@@ -134,12 +134,18 @@ export function HistoryCard({
   title,
   empty,
   showType = true,
+  token,
 }: {
   rows: HistoryRow[];
   title: string;
   empty: string;
   showType?: boolean;
+  /** Omitted in layout previews, which are not inside a token's route. */
+  token?: string;
 }) {
+  const receipt = (row: HistoryRow) =>
+    token && row.status === "approved" ? `/u/${token}/receipt/${row.submissionId}` : null;
+
   return (
     <Card className="!p-0">
       <h2 className="px-5 py-4 text-lg font-bold sm:px-6">{title}</h2>
@@ -169,6 +175,14 @@ export function HistoryCard({
                   <td className="px-3 py-4 font-semibold tabular-nums">{money(h.claimedAmount)}</td>
                   <td className="px-6 py-4 text-right">
                     <StatusPill status={h.status as Status} />
+                    {receipt(h) ? (
+                      <Link
+                        href={receipt(h)!}
+                        className="mt-1 block text-xs font-semibold text-brand underline"
+                      >
+                        Receipt
+                      </Link>
+                    ) : null}
                   </td>
                 </tr>
               ))}
@@ -185,6 +199,14 @@ export function HistoryCard({
                 <div className="shrink-0 text-right">
                   <p className="font-semibold tabular-nums">{money(h.claimedAmount)}</p>
                   <div className="mt-1"><StatusPill status={h.status as Status} /></div>
+                  {receipt(h) ? (
+                    <Link
+                      href={receipt(h)!}
+                      className="mt-1 inline-block text-xs font-semibold text-brand underline"
+                    >
+                      Receipt
+                    </Link>
+                  ) : null}
                 </div>
               </li>
             ))}

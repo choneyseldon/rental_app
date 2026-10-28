@@ -1,0 +1,41 @@
+/*
+ * A receipt is read on a phone and then, sometimes, printed or saved as a PDF.
+ * On screen it sits in the tenant portal like any other card. On paper the app
+ * chrome is already hidden by AppShell, so all this has to do is give the slip
+ * a sane width and take the shadows off.
+ */
+
+.receipt {
+  max-width: 34rem;
+}
+
+.receipt-no {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+@media print {
+  .receipt-no-print {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  .receipt {
+    max-width: none;
+    width: 100%;
+    box-shadow: none !important;
+    border: 0.3mm solid #000 !important;
+    border-radius: 2mm !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+}

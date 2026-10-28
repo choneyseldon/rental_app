@@ -117,6 +117,7 @@ export function WaterCards({
           title="Water history"
           empty="No water payments recorded yet."
           showType={false}
+          token={token}
         />
       </div>
     </div>

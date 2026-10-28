@@ -54,6 +54,12 @@ export default defineSchema({
       v.literal("rejected"),
     ),
     adminNote: v.optional(v.string()),
+    /**
+     * When the owner decided. Optional because the submissions reviewed before
+     * this existed have no such moment recorded; a receipt for one of those
+     * falls back to when it was sent.
+     */
+    reviewedAt: v.optional(v.number()),
   })
     .index("by_unit_and_period", ["unitId", "periodId"])
     .index("by_status", ["status"]),

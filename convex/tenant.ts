@@ -108,6 +108,10 @@ export const getByToken = query({
         months.set(s.periodId, m);
       }
       history.push({
+        // Carried so an approved row can link to its receipt. It is an id for
+        // a submission this unit's own token already resolves to, and the
+        // receipt query re-checks that it belongs to the holder of the token.
+        submissionId: s._id,
         month: m,
         type: s.type,
         claimedAmount: s.claimedAmount,
@@ -127,6 +131,50 @@ export const getByToken = query({
       rent: { amount: unit.rentAmount, status: rentStatus },
       water,
       history,
+    };
+  },
+});
+
+/**
+ * One approved payment, as a receipt.
+ *
+ * The token is still what authorises the read: the submission must belong to
+ * the unit that token resolves to, so an id guessed or copied from another
+ * flat's page resolves to nothing. Only approved payments have a receipt —
+ * a pending or rejected one is not proof of anything.
+ */
+export const getReceipt = query({
+  args: { token: v.string(), submissionId: v.id("submissions") },
+  handler: async (ctx, { token, submissionId }) => {
+    const unit = await ctx.db
+      .query("units")
+      .withIndex("by_token", (q) => q.eq("token", token))
+      .unique();
+    if (!unit) return null;
+
+    const submission = await ctx.db.get(submissionId);
+    if (!submission || submission.unitId !== unit._id) return null;
+    if (submission.status !== "approved") return null;
+
+    const period = await ctx.db.get(submission.periodId);
+    const month = period?.month ?? "";
+
+    return {
+      // Readable, and unique: a unit can hold only one approved payment per
+      // month per type, so this never collides.
+      receiptNo: `CB-${month.replace("-", "")}-${unit.unitNumber}-${
+        submission.type === "rent" ? "R" : "W"
+      }`,
+      unitNumber: unit.unitNumber,
+      tenantName: unit.tenantName,
+      month,
+      type: submission.type,
+      amount: submission.claimedAmount,
+      paidOn: submission._creationTime,
+      approvedOn: submission.reviewedAt ?? submission._creationTime,
+      // False for the rows decided before the timestamp existed, so the
+      // receipt can word that line honestly rather than invent a date.
+      hasApprovalDate: submission.reviewedAt !== undefined,
     };
   },
 });

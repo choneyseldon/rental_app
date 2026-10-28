@@ -28,9 +28,9 @@ const fixture: TenantData = {
     status: "pending",
   },
   history: [
-    { month: "2026-08", type: "rent", claimedAmount: 8500, status: "approved", adminNote: null, submittedAt: 1 },
-    { month: "2026-08", type: "water", claimedAmount: 390, status: "approved", adminNote: null, submittedAt: 2 },
-    { month: "2026-07", type: "rent", claimedAmount: 8000, status: "rejected", adminNote: "Screenshot was for July, not August.", submittedAt: 3 },
+    { submissionId: "s1" as TenantData["history"][number]["submissionId"], month: "2026-08", type: "rent", claimedAmount: 8500, status: "approved", adminNote: null, submittedAt: 1 },
+    { submissionId: "s2" as TenantData["history"][number]["submissionId"], month: "2026-08", type: "water", claimedAmount: 390, status: "approved", adminNote: null, submittedAt: 2 },
+    { submissionId: "s3" as TenantData["history"][number]["submissionId"], month: "2026-07", type: "rent", claimedAmount: 8000, status: "rejected", adminNote: "Screenshot was for July, not August.", submittedAt: 3 },
   ],
 };
 
@@ -69,7 +69,7 @@ export default function PreviewPage() {
       greeting={`Kuzuzangpo, ${fixture.tenantName} 👋`}
       subtitle="Your rental account for September 2026."
     >
-      <HomeCards data={fixture} />
+      <HomeCards data={fixture} token="preview-token" />
       <Divider id="rent" label="Rent page" />
       <div className="mt-5"><RentCards data={fixture} /></div>
       <Divider id="water" label="Water page" />

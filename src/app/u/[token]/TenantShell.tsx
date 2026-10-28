@@ -15,6 +15,7 @@ const COPY: Record<string, { title: string; subtitle: (month: string) => string 
   water: { title: "Water", subtitle: (m) => `Your share of the Thromde bill for ${m}.` },
   power: { title: "Power", subtitle: () => "Electricity is paid to BPC directly." },
   location: { title: "Location", subtitle: () => "Where the house is and who to call." },
+  receipt: { title: "Receipt", subtitle: () => "Proof of a payment the owner has accepted." },
 };
 
 export function TenantShell({
@@ -31,7 +32,11 @@ export function TenantShell({
   if (data === null) return <InvalidCode />;
 
   const base = `/u/${token}`;
-  const segment = pathname.startsWith(base) ? pathname.slice(base.length).replace(/^\//, "") : "";
+  // First path part only: a receipt lives at receipt/<id>, and the id is
+  // not part of which page this is.
+  const segment = (
+    pathname.startsWith(base) ? pathname.slice(base.length).replace(/^\//, "") : ""
+  ).split("/")[0];
   const copy = COPY[segment] ?? COPY[""];
 
   const nav: NavItem[] = [

@@ -83,6 +83,7 @@ export function RentCards({
           title="Rent history"
           empty="No rent payments recorded yet."
           showType={false}
+          token={token}
         />
       </div>
     </div>

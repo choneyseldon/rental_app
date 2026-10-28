@@ -72,6 +72,7 @@ export function HomeCards({
             rows={data.history}
             title="Recent payments"
             empty="Nothing yet."
+            token={token}
           />
         </div>
 

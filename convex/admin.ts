@@ -145,6 +145,7 @@ export const listPending = query({
           submissionId: s._id,
           unitNumber: unit?.unitNumber ?? "?",
           tenantName: unit?.tenantName ?? "",
+          tenantPhone: unit?.tenantPhone ?? "",
           month: period?.month ?? "",
           type: s.type,
           claimedAmount: s.claimedAmount,
@@ -197,6 +198,7 @@ export const reviewSubmission = mutation({
 
     await ctx.db.patch(submissionId, {
       status: decision,
+      reviewedAt: Date.now(),
       ...(note ? { adminNote: note } : {}),
     });
   },
@@ -222,6 +224,68 @@ export function splitEvenly(total: number, n: number): number[] {
 }
 
 /** Upload URL for the photo of the paper Thromde bill. */
+/**
+ * The decisions just made, so the owner can tell the tenant afterwards.
+ *
+ * The queue itself cannot carry that button: deciding removes the row from it.
+ * This list is also the place to come back to an hour later and send a message
+ * that was not sent at the time.
+ *
+ * `receiptPath` is the one place a door token leaves the server for the admin
+ * side, and it is deliberate: it is the link the tenant is sent, and the owner
+ * can already read every token on the Print QR page. No bare `token` field is
+ * returned, so there is nothing loose to hand to a component by mistake.
+ */
+export const listRecentlyReviewed = query({
+  args: { ...secretArg, limit: v.optional(v.number()) },
+  handler: async (ctx, { secret, limit }) => {
+    assertAdmin(ctx, secret);
+
+    const decided = [
+      ...(await ctx.db
+        .query("submissions")
+        .withIndex("by_status", (q) => q.eq("status", "approved"))
+        .collect()),
+      ...(await ctx.db
+        .query("submissions")
+        .withIndex("by_status", (q) => q.eq("status", "rejected"))
+        .collect()),
+    ];
+
+    // Submissions reviewed before reviewedAt existed fall back to when they
+    // were sent, so they sort sensibly rather than to the bottom.
+    const decidedAt = (s: (typeof decided)[number]) =>
+      s.reviewedAt ?? s._creationTime;
+
+    decided.sort((a, b) => decidedAt(b) - decidedAt(a));
+
+    const rows = await Promise.all(
+      decided.slice(0, limit ?? 8).map(async (s) => {
+        const unit = await ctx.db.get(s.unitId);
+        const period = await ctx.db.get(s.periodId);
+        return {
+          submissionId: s._id,
+          unitNumber: unit?.unitNumber ?? "?",
+          tenantName: unit?.tenantName ?? "",
+          tenantPhone: unit?.tenantPhone ?? "",
+          month: period?.month ?? "",
+          type: s.type,
+          claimedAmount: s.claimedAmount,
+          status: s.status,
+          adminNote: s.adminNote ?? null,
+          decidedAt: decidedAt(s),
+          receiptPath:
+            s.status === "approved" && unit
+              ? `/u/${unit.token}/receipt/${s._id}`
+              : null,
+        };
+      }),
+    );
+
+    return rows;
+  },
+});
+
 export const generateBillUploadUrl = mutation({
   args: secretArg,
   handler: async (ctx, { secret }) => {
