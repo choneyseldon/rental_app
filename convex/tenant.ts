@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, type QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
+import { historyStartMonth } from "./retention";
 
 /**
  * Bhutan is UTC+06:00 with no daylight saving. Deriving the month in UTC
@@ -92,8 +93,10 @@ export const getByToken = query({
       }
     }
 
-    // Everything this unit has ever submitted, newest first, with the month
-    // resolved so the page needs no second lookup.
+    // What this unit has submitted inside the history window, newest first,
+    // with the month resolved so the page needs no second lookup. Older rows
+    // stay in the database; they just stop being listed.
+    const windowStart = historyStartMonth(month);
     const all = await ctx.db
       .query("submissions")
       .withIndex("by_unit_and_period", (q) => q.eq("unitId", unit._id))
@@ -107,6 +110,7 @@ export const getByToken = query({
         m = (await ctx.db.get(s.periodId))?.month ?? "";
         months.set(s.periodId, m);
       }
+      if (m && m < windowStart) continue;
       history.push({
         // Carried so an approved row can link to its receipt. It is an id for
         // a submission this unit's own token already resolves to, and the

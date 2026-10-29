@@ -31,6 +31,11 @@ const fixture: TenantData = {
     { submissionId: "s1" as TenantData["history"][number]["submissionId"], month: "2026-08", type: "rent", claimedAmount: 8500, status: "approved", adminNote: null, submittedAt: 1 },
     { submissionId: "s2" as TenantData["history"][number]["submissionId"], month: "2026-08", type: "water", claimedAmount: 390, status: "approved", adminNote: null, submittedAt: 2 },
     { submissionId: "s3" as TenantData["history"][number]["submissionId"], month: "2026-07", type: "rent", claimedAmount: 8000, status: "rejected", adminNote: "Screenshot was for July, not August.", submittedAt: 3 },
+    { submissionId: "x1" as TenantData["history"][number]["submissionId"], month: "2026-01", type: "rent", claimedAmount: 8500, status: "approved", adminNote: null, submittedAt: 9 },
+    { submissionId: "x2" as TenantData["history"][number]["submissionId"], month: "2026-02", type: "water", claimedAmount: 8500, status: "approved", adminNote: null, submittedAt: 8 },
+    { submissionId: "x3" as TenantData["history"][number]["submissionId"], month: "2026-03", type: "rent", claimedAmount: 8500, status: "approved", adminNote: null, submittedAt: 7 },
+    { submissionId: "x4" as TenantData["history"][number]["submissionId"], month: "2026-04", type: "water", claimedAmount: 8500, status: "approved", adminNote: null, submittedAt: 6 },
+    { submissionId: "x5" as TenantData["history"][number]["submissionId"], month: "2026-05", type: "rent", claimedAmount: 8500, status: "approved", adminNote: null, submittedAt: 5 },
   ],
 };
 

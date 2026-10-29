@@ -1,9 +1,10 @@
 import { v } from "convex/values";
 import { nanoid } from "nanoid";
 import { mutation, query, type QueryCtx, type MutationCtx } from "./_generated/server";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { compareUnits } from "./property";
 import { currentMonthKey, deriveStatus } from "./tenant";
+import { MONTH_KEY, historyStartMonth, shiftMonth } from "./retention";
 
 /**
  * Convex functions are public HTTP endpoints, and the units table holds the
@@ -283,6 +284,171 @@ export const listRecentlyReviewed = query({
     );
 
     return rows;
+  },
+});
+
+/** Approved wins; otherwise the newest attempt, so a rejection still shows. */
+function bestSubmission(subs: Doc<"submissions">[]): Doc<"submissions"> | null {
+  return (
+    subs.find((s) => s.status === "approved") ??
+    [...subs].sort((a, b) => b._creationTime - a._creationTime)[0] ??
+    null
+  );
+}
+
+/**
+ * The months the History page can show: the current one back through the last
+ * twelve, but never earlier than the first month the system has any record of.
+ * Months before it went live would otherwise be listed with every flat unpaid,
+ * which is not a fact, just an absence.
+ */
+export const historyMonths = query({
+  args: secretArg,
+  handler: async (ctx, { secret }) => {
+    assertAdmin(ctx, secret);
+
+    const current = currentMonthKey();
+    const floor = historyStartMonth(current);
+    const periods = await ctx.db.query("periods").collect();
+
+    let start = current;
+    if (periods.length > 0) {
+      const earliest = periods.map((p) => p.month).sort()[0];
+      start = earliest > floor ? earliest : floor;
+    }
+    if (start > current) start = current;
+
+    const months: string[] = [];
+    for (let m = current; m >= start; m = shiftMonth(m, -1)) months.push(m);
+    return months;
+  },
+});
+
+/**
+ * One month, every flat, as it stood: what was paid, what was owed for water,
+ * and a link to the screenshot that backs each payment.
+ *
+ * Rent is shown as what was actually paid, never as "expected". A flat keeps one
+ * current rent figure, so an expected amount for a past month would be today's
+ * rent, which is wrong the moment a rent changes. Water shares are different:
+ * they are frozen when published, so they are true to the month they belong to.
+ *
+ * Returns null for a month outside the window, so a hand-edited URL cannot
+ * reach past it. No unit id and no door token is returned.
+ */
+export const historyMonth = query({
+  args: { ...secretArg, month: v.string() },
+  handler: async (ctx, { secret, month }) => {
+    assertAdmin(ctx, secret);
+
+    const current = currentMonthKey();
+    if (!MONTH_KEY.test(month) || month > current || month < historyStartMonth(current)) {
+      return null;
+    }
+
+    const period = await ctx.db
+      .query("periods")
+      .withIndex("by_month", (q) => q.eq("month", month))
+      .unique();
+
+    // No period row means no water bill was saved and nothing was sent. Say
+    // so, rather than listing every occupied flat as unpaid for a month the
+    // system has no record of.
+    if (!period) {
+      return {
+        month,
+        hasRecord: false,
+        rows: [],
+        summary: {
+          rentFlats: 0,
+          rentPaid: 0,
+          rentCollected: 0,
+          waterPublished: false,
+          waterTotal: null,
+          waterFlats: 0,
+          waterPaid: 0,
+          waterCollected: 0,
+          waterBillUrl: null,
+        },
+      };
+    }
+
+    const units = (await ctx.db.query("units").collect()).sort((a, b) =>
+      compareUnits(a.unitNumber, b.unitNumber),
+    );
+
+    const shares = await ctx.db
+      .query("waterShares")
+      .withIndex("by_period", (q) => q.eq("periodId", period._id))
+      .collect();
+
+    const rows = [];
+    for (const unit of units) {
+      const subs = await ctx.db
+        .query("submissions")
+        .withIndex("by_unit_and_period", (q) =>
+          q.eq("unitId", unit._id).eq("periodId", period._id),
+        )
+        .collect();
+      const share = shares.find((s) => s.unitId === unit._id) ?? null;
+
+      // A flat that moved out still has its history; one that never had
+      // anything this month and is empty now has nothing to show.
+      if (!unit.isOccupied && subs.length === 0 && !share) continue;
+
+      const rentSubs = subs.filter((s) => s.type === "rent");
+      const waterSubs = subs.filter((s) => s.type === "water");
+      const rentBest = bestSubmission(rentSubs);
+      const waterBest = bestSubmission(waterSubs);
+
+      rows.push({
+        unitNumber: unit.unitNumber,
+        tenantName: unit.tenantName,
+        isOwner: unit.isOwner === true,
+        rent: unit.isOwner
+          ? null
+          : {
+              status: deriveStatus(rentSubs),
+              amount: rentBest?.claimedAmount ?? null,
+              note: rentBest?.status === "rejected" ? (rentBest.adminNote ?? null) : null,
+              proofUrl: rentBest ? await ctx.storage.getUrl(rentBest.image) : null,
+            },
+        water: {
+          share: share?.amount ?? null,
+          status: unit.isOwner ? ("none" as const) : deriveStatus(waterSubs),
+          amount: waterBest?.claimedAmount ?? null,
+          note: waterBest?.status === "rejected" ? (waterBest.adminNote ?? null) : null,
+          proofUrl: waterBest ? await ctx.storage.getUrl(waterBest.image) : null,
+        },
+      });
+    }
+
+    const tenants = rows.filter((r) => !r.isOwner);
+    const paid = (kind: "rent" | "water") =>
+      tenants.filter((r) => (kind === "rent" ? r.rent?.status : r.water.status) === "approved");
+    const sum = (list: { amount: number | null }[]) =>
+      Math.round(list.reduce((a, r) => a + (r.amount ?? 0), 0) * 100) / 100;
+
+    const waterOwing = tenants.filter((r) => r.water.share !== null);
+
+    return {
+      month,
+      hasRecord: true,
+      rows,
+      summary: {
+        rentFlats: tenants.length,
+        rentPaid: paid("rent").length,
+        rentCollected: sum(paid("rent").map((r) => ({ amount: r.rent?.amount ?? null }))),
+        waterPublished: period.isPublished,
+        waterTotal: period.waterTotal ?? null,
+        waterFlats: waterOwing.length,
+        waterPaid: paid("water").length,
+        waterCollected: sum(paid("water").map((r) => ({ amount: r.water.amount }))),
+        waterBillUrl: period.waterBillImage
+          ? await ctx.storage.getUrl(period.waterBillImage)
+          : null,
+      },
+    };
   },
 });
 

@@ -135,6 +135,7 @@ export function HistoryCard({
   empty,
   showType = true,
   token,
+  limit,
 }: {
   rows: HistoryRow[];
   title: string;
@@ -142,7 +143,12 @@ export function HistoryCard({
   showType?: boolean;
   /** Omitted in layout previews, which are not inside a token's route. */
   token?: string;
+  /** Show only the newest few, and point at where the full list lives. */
+  limit?: number;
 }) {
+  const hidden = limit !== undefined && rows.length > limit ? rows.length - limit : 0;
+  if (hidden > 0) rows = rows.slice(0, limit);
+
   const receipt = (row: HistoryRow) =>
     token && row.status === "approved" ? `/u/${token}/receipt/${row.submissionId}` : null;
 
@@ -213,6 +219,26 @@ export function HistoryCard({
           </ul>
         </>
       )}
+      {hidden > 0 ? (
+        <p className="border-t border-line px-5 py-4 text-sm text-muted sm:px-6">
+          {hidden} older {hidden === 1 ? "payment" : "payments"} not shown. The last 12 months
+          are on the{" "}
+          {token ? (
+            <>
+              <Link href={`/u/${token}/rent`} className="font-semibold text-brand underline">
+                Rent
+              </Link>{" "}
+              and{" "}
+              <Link href={`/u/${token}/water`} className="font-semibold text-brand underline">
+                Water
+              </Link>
+            </>
+          ) : (
+            "Rent and Water"
+          )}{" "}
+          pages.
+        </p>
+      ) : null}
     </Card>
   );
 }

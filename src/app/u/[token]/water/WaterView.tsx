@@ -114,7 +114,7 @@ export function WaterCards({
       <div className="lg:col-span-1">
         <HistoryCard
           rows={waterHistory}
-          title="Water history"
+          title="Water history · last 12 months"
           empty="No water payments recorded yet."
           showType={false}
           token={token}

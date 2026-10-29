@@ -80,7 +80,7 @@ export function RentCards({
       <div className="lg:col-span-1">
         <HistoryCard
           rows={rentHistory}
-          title="Rent history"
+          title="Rent history · last 12 months"
           empty="No rent payments recorded yet."
           showType={false}
           token={token}

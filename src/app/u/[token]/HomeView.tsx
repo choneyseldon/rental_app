@@ -73,6 +73,7 @@ export function HomeCards({
             title="Recent payments"
             empty="Nothing yet."
             token={token}
+            limit={6}
           />
         </div>
 

@@ -5,6 +5,7 @@ import { AppShell, type NavItem } from "@/components/AppShell";
 import { buttonStyles } from "@/components/ui";
 import {
   IconBuilding,
+  IconCalendar,
   IconDrop,
   IconHome,
   IconPin,
@@ -20,6 +21,7 @@ const COPY: Record<string, { title: string; subtitle: string }> = {
   "/admin/units": { title: "Units", subtitle: "Tenant details, rent and door codes." },
   "/admin/review": { title: "Review", subtitle: "Rent and water screenshots waiting on you." },
   "/admin/water": { title: "Water", subtitle: "Upload the Thromde bill and split it." },
+  "/admin/history": { title: "History", subtitle: "The last 12 months, flat by flat." },
   "/admin/qr": { title: "Print QR", subtitle: "One card per door, ten to a page." },
   "/admin/house": { title: "House details", subtitle: "The building, its doors and how tenants reach it." },
 };
@@ -39,6 +41,7 @@ export function AdminShell({
     { href: "/admin/units", label: "Units", icon: <IconBuilding /> },
     { href: "/admin/review", label: "Review", icon: <IconReceipt />, badge: pending || undefined },
     { href: "/admin/water", label: "Water", icon: <IconDrop /> },
+    { href: "/admin/history", label: "History", icon: <IconCalendar /> },
     { href: "/admin/qr", label: "Print QR", icon: <IconQr /> },
     { href: "/admin/house", label: "House", icon: <IconPin /> },
   ];
