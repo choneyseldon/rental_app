@@ -61,11 +61,13 @@ export function AppShell({
   return (
     <div className="min-h-screen lg:flex">
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-brand-tint px-4 py-6 print:!hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:overflow-y-auto">
-        <div className="px-2">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-white px-4 py-6 print:!hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:overflow-y-auto">
+        {/* Matches the top bar's height at desktop width, so the divider under the
+            logo and the divider under the bar read as one line across the page. */}
+        <div className="-mx-4 -mt-6 flex h-[61px] shrink-0 items-center border-b border-line px-6">
           <Brand tagline={tagline} />
         </div>
-        <nav className="mt-8 flex flex-1 flex-col gap-1">
+        <nav className="mt-6 flex flex-1 flex-col gap-1">
           {nav.map((item) => {
             const active = activeFor(item.href);
             return (
@@ -76,7 +78,7 @@ export function AppShell({
                 className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold transition-colors ${
                   active
                     ? "bg-brand-soft text-brand-strong"
-                    : "text-slate-600 hover:bg-white hover:text-foreground"
+                    : "text-slate-600 hover:bg-brand-tint hover:text-foreground"
                 }`}
               >
                 <span className={active ? "text-brand" : "text-slate-400"}>{item.icon}</span>
@@ -99,7 +101,7 @@ export function AppShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-line bg-white/90 px-4 py-3 backdrop-blur print:hidden sm:px-6">
+        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-line bg-white/90 px-4 py-3 backdrop-blur print:hidden sm:px-6 lg:h-[61px]">
           <div className="lg:hidden">
             <Brand />
           </div>

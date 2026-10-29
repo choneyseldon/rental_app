@@ -153,13 +153,17 @@ export function HistoryCard({
     token && row.status === "approved" ? `/u/${token}/receipt/${row.submissionId}` : null;
 
   return (
-    <Card className="!p-0">
+    // @container: the table-or-list choice below follows this card's own width,
+    // not the screen's. The same card sits in a full-width slot on a tablet, a
+    // two-thirds slot on Home and a one-third slot on Rent and Water, and a
+    // screen-width breakpoint cannot tell those apart.
+    <Card className="@container !p-0">
       <h2 className="px-5 py-4 text-lg font-bold sm:px-6">{title}</h2>
       {rows.length === 0 ? (
         <p className="px-5 pb-6 text-muted sm:px-6">{empty}</p>
       ) : (
         <>
-          <table className="hidden w-full text-sm sm:table">
+          <table className="hidden w-full text-sm @lg:table">
             <thead>
               <tr className="border-y border-line text-left text-xs uppercase tracking-wide text-muted">
                 <th className="px-6 py-3 font-semibold">Month</th>
@@ -194,7 +198,7 @@ export function HistoryCard({
               ))}
             </tbody>
           </table>
-          <ul className="divide-y divide-line border-t border-line sm:hidden">
+          <ul className="divide-y divide-line border-t border-line @lg:hidden">
             {rows.map((h, i) => (
               <li key={i} className="flex items-center justify-between gap-3 px-5 py-4">
                 <div className="min-w-0">
