@@ -161,7 +161,7 @@ function UnitCard({ unit }: { unit: UnitRow }) {
 
 export function UnitsEditor({ units }: { units: UnitRow[] }) {
   return (
-    <ul className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+    <ul className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
       {units.map((unit) => <UnitCard key={unit._id} unit={unit} />)}
     </ul>
   );
