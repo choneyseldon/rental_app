@@ -62,9 +62,9 @@ export function AppShell({
     <div className="min-h-screen lg:flex">
       {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-white px-4 py-6 print:!hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:overflow-y-auto">
-        {/* Matches the top bar's height at desktop width, so the divider under the
-            logo and the divider under the bar read as one line across the page. */}
-        <div className="-mx-4 -mt-6 flex h-[61px] shrink-0 items-center border-b border-line px-6">
+        {/* Same height as the top bar at desktop width, so the logo sits level with
+            the bar's content. No divider of its own. */}
+        <div className="-mx-4 -mt-6 flex h-[61px] shrink-0 items-center px-6">
           <Brand tagline={tagline} />
         </div>
         <nav className="mt-6 flex flex-1 flex-col gap-1">
