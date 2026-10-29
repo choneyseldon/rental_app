@@ -16,9 +16,9 @@ export const PROPERTY = {
 
 /** Where tenants transfer rent. Shown on the tenant page with a copy button. */
 export const RENT_ACCOUNT = {
-  holder: "Norbu Dolma",
+  holder: "Norbu Dolma Tashi",
   bank: "Bank of Bhutan",
-  number: "200570303",
+  number: "777811788",
 } as const;
 
 /** The ten let doors, in the order they should always appear. */
