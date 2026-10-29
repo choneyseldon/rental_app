@@ -62,7 +62,7 @@ export function InquiryList({ rows }: { rows: InquiryRow[] }) {
               <div>
                 <dt className="sr-only">Email</dt>
                 <dd>
-                  <a href={`mailto:${r.email}`} className="break-all font-semibold text-brand underline">
+                  <a href={`mailto:${encodeURIComponent(r.email).replace(/%40/g, "@")}`} className="break-all font-semibold text-brand underline">
                     {r.email}
                   </a>
                 </dd>

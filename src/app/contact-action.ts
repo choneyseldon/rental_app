@@ -1,10 +1,13 @@
 "use server";
 
+import { ConvexError } from "convex/values";
 import { api } from "../../convex/_generated/api";
 import { adminClient } from "@/lib/convex-admin";
 import type { ContactState } from "./_landing/contact-state";
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+// Characters that mean something inside a mailto: link (?subject=, &bcc=, a
+// comma-separated list) are refused, so a stored address is only ever an address.
+const EMAIL = /^[^\s@?&#%,;<>"]+@[^\s@?&#%,;<>"]+\.[^\s@?&#%,;<>"]{2,}$/;
 
 function text(formData: FormData, key: string): string {
   const v = formData.get(key);
@@ -34,7 +37,8 @@ export async function sendInquiry(
 
   // A honeypot: hidden from people, irresistible to form-filling bots. Pretend
   // it worked so the bot has nothing to learn from.
-  if (text(formData, "website")) {
+  // Named "fax", not "website" or "url", which browser autofill fills for real people.
+  if (text(formData, "fax")) {
     return { status: "sent", errors: {}, values: {} };
   }
 
@@ -66,11 +70,9 @@ export async function sendInquiry(
       ...(values.message ? { message: values.message } : {}),
     });
   } catch (e) {
-    // The mutation's own refusals are written to be read; anything else is
-    // an outage, which the visitor should not see the internals of.
-    const raw = e instanceof Error ? e.message : "";
-    const thrown = /Uncaught Error:\s*(.+)/.exec(raw)?.[1]?.trim() ?? "";
-    const readable = /already have your message|too long|whole number/i.test(thrown) ? thrown : "";
+    // The mutation's own refusals are ConvexErrors written to be read; anything
+    // else is an outage, which the visitor should not see the internals of.
+    const readable = e instanceof ConvexError && typeof e.data === "string" ? e.data : "";
     return {
       status: "error",
       errors: {},

@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { nanoid } from "nanoid";
 import { mutation, query, type QueryCtx, type MutationCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
@@ -766,9 +766,11 @@ export const submitInquiry = mutation({
       fields.buildingName.length > 160 ||
       fields.location.length > 160 ||
       (fields.message?.length ?? 0) > 2000;
-    if (tooLong) throw new Error("One of the fields is too long.");
+    // ConvexError, not Error: production deployments redact a plain Error's
+    // message, so only a ConvexError's data reaches our server action.
+    if (tooLong) throw new ConvexError("One of the fields is too long.");
     if (!Number.isInteger(fields.unitCount) || fields.unitCount < 1 || fields.unitCount > 1000) {
-      throw new Error("Enter the number of units as a whole number.");
+      throw new ConvexError("Enter the number of units as a whole number.");
     }
 
     const email = fields.email.toLowerCase();
@@ -778,7 +780,7 @@ export const submitInquiry = mutation({
       .order("desc")
       .first();
     if (recent && Date.now() - recent._creationTime < 60 * 60 * 1000) {
-      throw new Error("We already have your message and will be in touch soon.");
+      throw new ConvexError("We already have your message and will be in touch soon.");
     }
 
     await ctx.db.insert("inquiries", { ...fields, email, isHandled: false });
