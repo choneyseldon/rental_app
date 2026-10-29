@@ -737,3 +737,67 @@ export const dashboard = query({
     };
   },
 });
+
+/**
+ * A landing-page enquiry. Called from our own server action, which has already
+ * validated and trimmed the fields; the length caps here are the backstop.
+ *
+ * One enquiry per email per hour: a double-tap or a bot repeating itself gets a
+ * calm refusal instead of filling the owner's inbox.
+ */
+export const submitInquiry = mutation({
+  args: {
+    ...secretArg,
+    name: v.string(),
+    email: v.string(),
+    phone: v.string(),
+    buildingName: v.string(),
+    location: v.string(),
+    unitCount: v.number(),
+    message: v.optional(v.string()),
+  },
+  handler: async (ctx, { secret, ...fields }) => {
+    assertAdmin(ctx, secret);
+
+    const tooLong =
+      fields.name.length > 120 ||
+      fields.email.length > 254 ||
+      fields.phone.length > 40 ||
+      fields.buildingName.length > 160 ||
+      fields.location.length > 160 ||
+      (fields.message?.length ?? 0) > 2000;
+    if (tooLong) throw new Error("One of the fields is too long.");
+    if (!Number.isInteger(fields.unitCount) || fields.unitCount < 1 || fields.unitCount > 1000) {
+      throw new Error("Enter the number of units as a whole number.");
+    }
+
+    const email = fields.email.toLowerCase();
+    const recent = await ctx.db
+      .query("inquiries")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .order("desc")
+      .first();
+    if (recent && Date.now() - recent._creationTime < 60 * 60 * 1000) {
+      throw new Error("We already have your message and will be in touch soon.");
+    }
+
+    await ctx.db.insert("inquiries", { ...fields, email, isHandled: false });
+  },
+});
+
+/** Newest first, for the owner's Inquiries page. */
+export const listInquiries = query({
+  args: secretArg,
+  handler: async (ctx, { secret }) => {
+    assertAdmin(ctx, secret);
+    return ctx.db.query("inquiries").order("desc").take(200);
+  },
+});
+
+export const setInquiryHandled = mutation({
+  args: { ...secretArg, inquiryId: v.id("inquiries"), isHandled: v.boolean() },
+  handler: async (ctx, { secret, inquiryId, isHandled }) => {
+    assertAdmin(ctx, secret);
+    await ctx.db.patch(inquiryId, { isHandled });
+  },
+});

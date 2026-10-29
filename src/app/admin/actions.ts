@@ -212,3 +212,28 @@ export async function publishWaterBill(
   revalidatePath("/admin/units");
   return null;
 }
+
+/** Marks a landing-page enquiry as dealt with, or puts it back. */
+export async function setInquiryHandled(
+  _prev: { error: string } | null,
+  formData: FormData,
+): Promise<{ error: string } | null> {
+  await requireAdmin();
+
+  const inquiryId = formData.get("inquiryId");
+  if (typeof inquiryId !== "string") return { error: "Missing enquiry." };
+
+  const { client, secret } = adminClient();
+  try {
+    await client.mutation(api.admin.setInquiryHandled, {
+      secret,
+      inquiryId: inquiryId as Id<"inquiries">,
+      isHandled: formData.get("isHandled") === "true",
+    });
+  } catch {
+    return { error: "Could not update that enquiry." };
+  }
+
+  revalidatePath("/admin/inquiries");
+  return null;
+}

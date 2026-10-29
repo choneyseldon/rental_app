@@ -63,4 +63,20 @@ export default defineSchema({
   })
     .index("by_unit_and_period", ["unitId", "periodId"])
     .index("by_status", ["status"]),
+
+  // Enquiries from the public landing page: a prospective owner asking about
+  // ChimBill. Written only by our own server (secret-gated), never by a
+  // browser, so a bot cannot skip the form's checks and write rows directly.
+  inquiries: defineTable({
+    name: v.string(),
+    email: v.string(),
+    phone: v.string(),
+    buildingName: v.string(),
+    location: v.string(),
+    unitCount: v.number(),
+    message: v.optional(v.string()),
+    isHandled: v.boolean(),
+  })
+    .index("by_email", ["email"])
+    .index("by_handled", ["isHandled"]),
 });
