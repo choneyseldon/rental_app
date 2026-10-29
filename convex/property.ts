@@ -16,8 +16,8 @@ export const PROPERTY = {
 
 /** Where tenants transfer rent. Shown on the tenant page with a copy button. */
 export const RENT_ACCOUNT = {
-  holder: "Norbu Dolma Tashi",
-  bank: "Bank of Bhutan",
+  holder: "Norbu Dolma",
+  bank: "Tashi Bank",
   number: "777811788",
 } as const;
 
