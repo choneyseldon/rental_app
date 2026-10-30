@@ -9,7 +9,6 @@ import {
   IconDrop,
   IconHome,
   IconPin,
-  IconSend,
   IconLogout,
   IconQr,
   IconReceipt,
@@ -24,7 +23,6 @@ const COPY: Record<string, { title: string; subtitle: string }> = {
   "/admin/water": { title: "Water", subtitle: "Upload the Thromde bill and split it." },
   "/admin/history": { title: "History", subtitle: "The last 12 months, flat by flat." },
   "/admin/qr": { title: "Print QR", subtitle: "One card per door, ten to a page." },
-  "/admin/inquiries": { title: "Inquiries", subtitle: "Owners who asked about ChimBill from the home page." },
   "/admin/house": { title: "House details", subtitle: "The building, its doors and how tenants reach it." },
 };
 
@@ -46,7 +44,6 @@ export function AdminShell({
     { href: "/admin/history", label: "History", icon: <IconCalendar /> },
     { href: "/admin/qr", label: "Print QR", icon: <IconQr /> },
     { href: "/admin/house", label: "House", icon: <IconPin /> },
-    { href: "/admin/inquiries", label: "Inquiries", icon: <IconSend /> },
   ];
 
   return (

@@ -8,7 +8,7 @@ import {
   createAdminSession,
   destroyAdminSession,
   hasAdminSession,
-  isPasscodeCorrect,
+  areCredentialsCorrect,
 } from "@/lib/admin-session";
 import { adminClient } from "@/lib/convex-admin";
 
@@ -21,9 +21,15 @@ export async function logIn(
   _prev: { error: string } | null,
   formData: FormData,
 ): Promise<{ error: string } | null> {
+  const username = formData.get("username");
   const passcode = formData.get("passcode");
-  if (typeof passcode !== "string" || !isPasscodeCorrect(passcode)) {
-    return { error: "Incorrect passcode." };
+  if (
+    typeof username !== "string" ||
+    typeof passcode !== "string" ||
+    !areCredentialsCorrect(username, passcode)
+  ) {
+    // One message for both, so it never says which half was wrong.
+    return { error: "Incorrect username or passcode." };
   }
   await createAdminSession();
   redirect("/admin");
@@ -210,30 +216,5 @@ export async function publishWaterBill(
   revalidatePath("/admin/water");
   revalidatePath("/admin");
   revalidatePath("/admin/units");
-  return null;
-}
-
-/** Marks a landing-page enquiry as dealt with, or puts it back. */
-export async function setInquiryHandled(
-  _prev: { error: string } | null,
-  formData: FormData,
-): Promise<{ error: string } | null> {
-  await requireAdmin();
-
-  const inquiryId = formData.get("inquiryId");
-  if (typeof inquiryId !== "string") return { error: "Missing enquiry." };
-
-  const { client, secret } = adminClient();
-  try {
-    await client.mutation(api.admin.setInquiryHandled, {
-      secret,
-      inquiryId: inquiryId as Id<"inquiries">,
-      isHandled: formData.get("isHandled") === "true",
-    });
-  } catch {
-    return { error: "Could not update that enquiry." };
-  }
-
-  revalidatePath("/admin/inquiries");
   return null;
 }

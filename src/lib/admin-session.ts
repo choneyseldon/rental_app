@@ -27,12 +27,21 @@ function sign(payload: string): string {
 }
 
 /**
+ * Checks the username and the passcode. Both are always compared, so the time
+ * taken does not reveal which one was wrong. The username ignores case and
+ * surrounding spaces, because phones capitalise the first letter.
+ *
  * The cookie carries an expiry and a signature over it — never the passcode.
  * Signing means a tampered or hand-crafted cookie is rejected, so possession
  * of the cookie is not the same as knowing the secret.
  */
-export function isPasscodeCorrect(candidate: string): boolean {
-  return safeEqual(candidate, requiredEnv("ADMIN_PASSCODE"));
+export function areCredentialsCorrect(username: string, passcode: string): boolean {
+  const userOk = safeEqual(
+    username.trim().toLowerCase(),
+    requiredEnv("ADMIN_USERNAME").trim().toLowerCase(),
+  );
+  const passOk = safeEqual(passcode, requiredEnv("ADMIN_PASSCODE"));
+  return userOk && passOk;
 }
 
 export async function createAdminSession(): Promise<void> {

@@ -40,7 +40,7 @@ npx convex run seed:seedUnits --push
 npm run dev
 ```
 
-- `/admin` — the owner's side, passcode from `ADMIN_PASSCODE`
+- `/admin` — the owner's side, username and passcode from `ADMIN_USERNAME` and `ADMIN_PASSCODE`
 - `/u/<token>` — a tenant's page; use the **Open** link on the Print QR page
 
 ## Going live

@@ -743,7 +743,9 @@ export const dashboard = query({
  * validated and trimmed the fields; the length caps here are the backstop.
  *
  * One enquiry per email per hour: a double-tap or a bot repeating itself gets a
- * calm refusal instead of filling the owner's inbox.
+ * calm refusal instead of a flood of emails. The row is a backup of what our
+ * server emails to ChimBill; building owners never see it, so there is no
+ * listing function here on purpose.
  */
 export const submitInquiry = mutation({
   args: {
@@ -784,22 +786,5 @@ export const submitInquiry = mutation({
     }
 
     await ctx.db.insert("inquiries", { ...fields, email, isHandled: false });
-  },
-});
-
-/** Newest first, for the owner's Inquiries page. */
-export const listInquiries = query({
-  args: secretArg,
-  handler: async (ctx, { secret }) => {
-    assertAdmin(ctx, secret);
-    return ctx.db.query("inquiries").order("desc").take(200);
-  },
-});
-
-export const setInquiryHandled = mutation({
-  args: { ...secretArg, inquiryId: v.id("inquiries"), isHandled: v.boolean() },
-  handler: async (ctx, { secret, inquiryId, isHandled }) => {
-    assertAdmin(ctx, secret);
-    await ctx.db.patch(inquiryId, { isHandled });
   },
 });

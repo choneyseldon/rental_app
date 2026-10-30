@@ -3,6 +3,7 @@
 import { ConvexError } from "convex/values";
 import { api } from "../../convex/_generated/api";
 import { adminClient } from "@/lib/convex-admin";
+import { emailInquiry } from "@/lib/inquiry-email";
 import type { ContactState } from "./_landing/contact-state";
 
 // Characters that mean something inside a mailto: link (?subject=, &bcc=, a
@@ -15,7 +16,8 @@ function text(formData: FormData, key: string): string {
 }
 
 /**
- * Takes an enquiry from the public landing page.
+ * Takes an enquiry from the public landing page: saves a copy in Convex, then
+ * emails it to ChimBill. Building owners never see enquiries.
  *
  * Runs on our server so the Convex secret never reaches the browser: the
  * `submitInquiry` mutation refuses anything without it, which means a bot
@@ -57,18 +59,19 @@ export async function sendInquiry(
   }
   if (Object.keys(errors).length > 0) return { status: "error", errors, values };
 
+  const inquiry = {
+    name: values.name,
+    email: values.email,
+    phone: values.phone,
+    buildingName: values.buildingName,
+    location: values.location,
+    unitCount,
+    ...(values.message ? { message: values.message } : {}),
+  };
+
   try {
     const { client, secret } = adminClient();
-    await client.mutation(api.admin.submitInquiry, {
-      secret,
-      name: values.name,
-      email: values.email,
-      phone: values.phone,
-      buildingName: values.buildingName,
-      location: values.location,
-      unitCount,
-      ...(values.message ? { message: values.message } : {}),
-    });
+    await client.mutation(api.admin.submitInquiry, { secret, ...inquiry });
   } catch (e) {
     // The mutation's own refusals are ConvexErrors written to be read; anything
     // else is an outage, which the visitor should not see the internals of.
@@ -81,6 +84,10 @@ export async function sendInquiry(
       values,
     };
   }
+
+  // The copy in Convex is safe by now. A failed email is logged, not shown: the
+  // visitor did nothing wrong and the enquiry is not lost.
+  await emailInquiry(inquiry);
 
   return { status: "sent", errors: {}, values: {} };
 }

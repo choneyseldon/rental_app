@@ -58,6 +58,7 @@ $b = New-Object byte[] 32
 
 | Secret | What it is |
 | --- | --- |
+| `ADMIN_USERNAME` | the username you type to log in. Not a secret, but not "admin" either |
 | `ADMIN_PASSCODE` | what you type to log in. Long, and not a word — it is the only thing protecting every tenant's data and all ten door tokens |
 | `ADMIN_SESSION_SECRET` | first generated value. Signs the login cookie |
 | `ADMIN_API_SECRET` | second generated value. Proves to Convex that a request came from your own server |
@@ -100,6 +101,7 @@ Convex dashboard → your project → **Settings** → **Deploy keys** → gener
    | --- | --- |
    | `CONVEX_DEPLOY_KEY` | the key from step 4 |
    | `APP_BASE_URL` | your domain, e.g. `https://chimbill.bt` — must be `https` |
+   | `ADMIN_USERNAME` | the username you choose |
    | `ADMIN_PASSCODE` | from step 2 |
    | `ADMIN_SESSION_SECRET` | from step 2 |
    | `ADMIN_API_SECRET` | **the same value as step 3** |
@@ -128,7 +130,7 @@ rather than duplicating, so running it twice is harmless.
 
 ## 7. Enter the real details
 
-Log in at `https://your-domain/admin` with your `ADMIN_PASSCODE`, open
+Log in at `https://your-domain/admin` with your `ADMIN_USERNAME` and `ADMIN_PASSCODE`, open
 **Units**, and for each of the ten doors fill in:
 
 - tenant name
@@ -215,7 +217,11 @@ year of records exists than after.
 | `NEXT_PUBLIC_CONVEX_URL` | Vercel | the build command, automatically |
 | `CONVEX_DEPLOY_KEY` | Vercel | you, from the Convex dashboard |
 | `APP_BASE_URL` | Vercel | you — your public https domain |
+| `ADMIN_USERNAME` | Vercel | you |
 | `ADMIN_PASSCODE` | Vercel | you |
+| `RESEND_API_KEY` | Vercel | you, from resend.com. Enquiries are emailed through it |
+| `INQUIRY_TO_EMAIL` | Vercel | you — the inbox enquiries go to |
+| `INQUIRY_FROM_EMAIL` | Vercel | optional; needs a domain verified in Resend |
 | `ADMIN_SESSION_SECRET` | Vercel | you |
 | `ADMIN_API_SECRET` | Vercel **and** Convex prod | you, the same value in both |
 

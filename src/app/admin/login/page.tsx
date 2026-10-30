@@ -12,6 +12,23 @@ export default function AdminLoginPage() {
       <form action={formAction} className="card w-full max-w-sm space-y-4 p-6">
         <Brand tagline="Rent & Utility Management" />
         <div>
+          <label htmlFor="username" className="block text-sm font-semibold">
+            Username
+          </label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            autoFocus
+            required
+            className="mt-1 min-h-12 w-full rounded-xl border border-line bg-white px-4 text-base outline-none focus:border-brand"
+          />
+        </div>
+        <div>
           <label htmlFor="passcode" className="block text-sm font-semibold">
             Passcode
           </label>
@@ -20,7 +37,6 @@ export default function AdminLoginPage() {
             name="passcode"
             type="password"
             autoComplete="current-password"
-            autoFocus
             required
             className="mt-1 min-h-12 w-full rounded-xl border border-line bg-white px-4 text-base outline-none focus:border-brand"
           />
