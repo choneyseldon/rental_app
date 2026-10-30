@@ -1,22 +1,14 @@
 import "server-only";
 
-export type InquiryEmail = {
-  name: string;
-  email: string;
-  phone: string;
-  buildingName: string;
-  location: string;
-  unitCount: number;
-  message?: string;
-};
+import { inquiryHtml, inquirySubject, inquiryText, type InquiryEmail } from "./inquiry-email-template";
 
-/** Header values must be one line; a pasted newline cannot add a header. */
-const oneLine = (s: string) => s.replace(/[\r\n]+/g, " ").trim();
+export type { InquiryEmail };
 
 /**
  * Emails a landing-page enquiry to ChimBill's own inbox through Resend.
  *
- * Plain text only, so nothing a visitor typed is ever interpreted as markup.
+ * Sent as HTML with a plain-text twin. The HTML escapes everything a visitor typed,
+ * so nothing they enter is ever interpreted as markup.
  * Reply-To is the visitor, so answering the email answers them.
  *
  * Returns false instead of throwing: the enquiry is already saved in Convex by
@@ -30,18 +22,6 @@ export async function emailInquiry(i: InquiryEmail): Promise<boolean> {
     return false;
   }
 
-  const body = [
-    `Name:      ${i.name}`,
-    `Email:     ${i.email}`,
-    `Phone:     ${i.phone}`,
-    `Building:  ${i.buildingName}`,
-    `Town:      ${i.location}`,
-    `Units:     ${i.unitCount}`,
-    "",
-    "Message:",
-    i.message || "(none)",
-  ].join("\n");
-
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -50,8 +30,9 @@ export async function emailInquiry(i: InquiryEmail): Promise<boolean> {
         from: process.env.INQUIRY_FROM_EMAIL || "ChimBill <onboarding@resend.dev>",
         to: [to],
         reply_to: i.email,
-        subject: oneLine(`New ChimBill enquiry: ${i.buildingName}, ${i.location} (${i.unitCount} units)`),
-        text: body,
+        subject: inquirySubject(i),
+        html: inquiryHtml(i),
+        text: inquiryText(i),
       }),
       signal: AbortSignal.timeout(8000),
     });
